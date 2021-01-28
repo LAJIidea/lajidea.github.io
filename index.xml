@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>kingkiller’s blog</title>
-    <link>https://lajiidea.github.io/lajidea.github.io/</link>
+    <link>http://www.kingkiller.cn/</link>
     <description>Recent content on kingkiller’s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 28 Jan 2021 18:00:58 +0800</lastBuildDate><atom:link href="https://lajiidea.github.io/lajidea.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 28 Jan 2021 18:00:58 +0800</lastBuildDate><atom:link href="http://www.kingkiller.cn/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>String字符串拼接比较</title>
-      <link>https://lajiidea.github.io/lajidea.github.io/post/string/</link>
+      <link>http://www.kingkiller.cn/post/string/</link>
       <pubDate>Thu, 28 Jan 2021 18:00:58 +0800</pubDate>
       
-      <guid>https://lajiidea.github.io/lajidea.github.io/post/string/</guid>
+      <guid>http://www.kingkiller.cn/post/string/</guid>
       <description>StringBuilder做字符串拼接高效的原因 1.与String相比 通过分析源码,发现两者底层都是用一个数组来存储字符
 public final class String implements java.io.Serializable,Comparable&amp;lt;String&amp;gt;,CharSequence{ /** The value is used for character storage */ private final char value[]; ==这里需要注意,StringBuilder本身并没有定义value数组,我们需进入其父类AbstractStringBuilder中,可以发现用来存储字符的数组value.==
 /** * The value is used for character storage */ char value[]; 可以发现,String底层的数组是用final修饰的,是一个数组常量,而StringBuilder底层用来接收存储字符的数组是一个变量.所以前者在创建之后是没法更改,而后者可以
@@ -26,19 +26,19 @@ package reason; public class Test { public static void main(String[] args){ Stri
     
     <item>
       <title>2021春节档前瞻</title>
-      <link>https://lajiidea.github.io/lajidea.github.io/post/firstflimreview/</link>
+      <link>http://www.kingkiller.cn/post/firstflimreview/</link>
       <pubDate>Thu, 28 Jan 2021 17:09:18 +0800</pubDate>
       
-      <guid>https://lajiidea.github.io/lajidea.github.io/post/firstflimreview/</guid>
+      <guid>http://www.kingkiller.cn/post/firstflimreview/</guid>
       <description>2021年的春节档前瞻，经历了惨淡的2020年，内地电影市场准备在2021年开春就做出冲击</description>
     </item>
     
     <item>
       <title>spring</title>
-      <link>https://lajiidea.github.io/lajidea.github.io/post/firstblog/</link>
+      <link>http://www.kingkiller.cn/post/firstblog/</link>
       <pubDate>Thu, 28 Jan 2021 16:07:02 +0800</pubDate>
       
-      <guid>https://lajiidea.github.io/lajidea.github.io/post/firstblog/</guid>
+      <guid>http://www.kingkiller.cn/post/firstblog/</guid>
       <description>spring的学习与介绍
 1.Spring 简介:
  2002,首次推出了Spring框架的雏形:interface21框架 2004年3月24发布了1.0正式版 Rod Johnson,SpringFramework创始人.(悉尼大学音乐学博士)  1.IOC导论 先看一下在没有使用spring框架时,我们是怎样开发的.这里使用一个dao层和一个service层做示范,Dao层中有一个userDao类,提供了一个获取用户信息的方法. 在service层中调用Dao层,用户看不见Dao层的操作.
