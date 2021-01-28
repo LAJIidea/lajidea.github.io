@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>spring on kingkiller’s blog</title>
-    <link>https://lajidea.github.io/tags/spring/</link>
+    <link>https://lajiidea.github.io/lajidea.github.io/tags/spring/</link>
     <description>Recent content in spring on kingkiller’s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 28 Jan 2021 16:07:02 +0800</lastBuildDate><atom:link href="https://lajidea.github.io/tags/spring/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 28 Jan 2021 16:07:02 +0800</lastBuildDate><atom:link href="https://lajiidea.github.io/lajidea.github.io/tags/spring/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>spring</title>
-      <link>https://lajidea.github.io/post/firstblog/</link>
+      <link>https://lajiidea.github.io/lajidea.github.io/post/firstblog/</link>
       <pubDate>Thu, 28 Jan 2021 16:07:02 +0800</pubDate>
       
-      <guid>https://lajidea.github.io/post/firstblog/</guid>
+      <guid>https://lajiidea.github.io/lajidea.github.io/post/firstblog/</guid>
       <description>spring的学习与介绍
 1.Spring 简介:
  2002,首次推出了Spring框架的雏形:interface21框架 2004年3月24发布了1.0正式版 Rod Johnson,SpringFramework创始人.(悉尼大学音乐学博士)  1.IOC导论 先看一下在没有使用spring框架时,我们是怎样开发的.这里使用一个dao层和一个service层做示范,Dao层中有一个userDao类,提供了一个获取用户信息的方法. 在service层中调用Dao层,用户看不见Dao层的操作.
