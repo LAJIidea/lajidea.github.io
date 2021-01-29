@@ -6,17 +6,23 @@
     <description>Recent content in spring on kingkiller’s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 28 Jan 2021 16:07:02 +0800</lastBuildDate><atom:link href="http://www.kingkiller.cn/tags/spring/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 29 Jan 2021 19:10:13 +0800</lastBuildDate><atom:link href="http://www.kingkiller.cn/tags/spring/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>spring mvc基础</title>
+      <link>http://www.kingkiller.cn/post/mvc/</link>
+      <pubDate>Fri, 29 Jan 2021 19:10:13 +0800</pubDate>
+      
+      <guid>http://www.kingkiller.cn/post/mvc/</guid>
+      <description>&lt;p&gt;了解MVC设计模式的思想,学习spring mvc基础，ssm框架现在虽说没有springboot轻便，但是了解底层基础和演变过程会对boot的学习有很多益处&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>spring</title>
       <link>http://www.kingkiller.cn/post/firstblog/</link>
       <pubDate>Thu, 28 Jan 2021 16:07:02 +0800</pubDate>
       
       <guid>http://www.kingkiller.cn/post/firstblog/</guid>
-      <description>spring的学习与介绍
-1.Spring 简介:
- 2002,首次推出了Spring框架的雏形:interface21框架 2004年3月24发布了1.0正式版 Rod Johnson,SpringFramework创始人.(悉尼大学音乐学博士)  1.IOC导论 先看一下在没有使用spring框架时,我们是怎样开发的.这里使用一个dao层和一个service层做示范,Dao层中有一个userDao类,提供了一个获取用户信息的方法. 在service层中调用Dao层,用户看不见Dao层的操作.
-1.userDao接口 package com.kingkiller.dao; public interface UserDao { void getUser(); } 2.UserDaoImpl实现类 package com.kingkiller.dao; public class UserDaoImpl implements UserDao { public void getUser(){ System.out.println(&amp;#34;默认获取用户的数据&amp;#34;); } } 3.UserService业务接口 package com.kingkiller.service; public interface UserService { void getUser(); } 4.UserServiceImpl业务实现类 package com.kingkiller.service; import com.kingkiller.dao.UserDao; import com.kingkiller.dao.UserDaoImpl; public class UserServiceImpl implements UserService { private UserDao userDao = new UserDaoImpl(); public void getUser(){ userDao.getUser(); } } 5.</description>
+      <description>&lt;p&gt;spring framework的学习与介绍，详细讲解了ioc和aop的概念，基于spring5x，了解了面向bean开发的过程。&lt;/p&gt;</description>
     </item>
     
   </channel>

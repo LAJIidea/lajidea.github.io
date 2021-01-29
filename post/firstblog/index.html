@@ -21,10 +21,7 @@
 
 
 <meta property="og:title" content="spring" />
-<meta property="og:description" content="spring的学习与介绍
-1.Spring 简介:
- 2002,首次推出了Spring框架的雏形:interface21框架 2004年3月24发布了1.0正式版 Rod Johnson,SpringFramework创始人.(悉尼大学音乐学博士)  1.IOC导论 先看一下在没有使用spring框架时,我们是怎样开发的.这里使用一个dao层和一个service层做示范,Dao层中有一个userDao类,提供了一个获取用户信息的方法. 在service层中调用Dao层,用户看不见Dao层的操作.
-1.userDao接口 package com.kingkiller.dao; public interface UserDao { void getUser(); } 2.UserDaoImpl实现类 package com.kingkiller.dao; public class UserDaoImpl implements UserDao { public void getUser(){ System.out.println(&#34;默认获取用户的数据&#34;); } } 3.UserService业务接口 package com.kingkiller.service; public interface UserService { void getUser(); } 4.UserServiceImpl业务实现类 package com.kingkiller.service; import com.kingkiller.dao.UserDao; import com.kingkiller.dao.UserDaoImpl; public class UserServiceImpl implements UserService { private UserDao userDao = new UserDaoImpl(); public void getUser(){ userDao.getUser(); } } 5." />
+<meta property="og:description" content="spring framework的学习与介绍，详细讲解了ioc和aop的概念，基于spring5x，了解了面向bean开发的过程。" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://www.kingkiller.cn/post/firstblog/" />
 <meta property="article:published_time" content="2021-01-28T16:07:02+08:00" />
@@ -34,10 +31,7 @@
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="spring"/>
-<meta name="twitter:description" content="spring的学习与介绍
-1.Spring 简介:
- 2002,首次推出了Spring框架的雏形:interface21框架 2004年3月24发布了1.0正式版 Rod Johnson,SpringFramework创始人.(悉尼大学音乐学博士)  1.IOC导论 先看一下在没有使用spring框架时,我们是怎样开发的.这里使用一个dao层和一个service层做示范,Dao层中有一个userDao类,提供了一个获取用户信息的方法. 在service层中调用Dao层,用户看不见Dao层的操作.
-1.userDao接口 package com.kingkiller.dao; public interface UserDao { void getUser(); } 2.UserDaoImpl实现类 package com.kingkiller.dao; public class UserDaoImpl implements UserDao { public void getUser(){ System.out.println(&#34;默认获取用户的数据&#34;); } } 3.UserService业务接口 package com.kingkiller.service; public interface UserService { void getUser(); } 4.UserServiceImpl业务实现类 package com.kingkiller.service; import com.kingkiller.dao.UserDao; import com.kingkiller.dao.UserDaoImpl; public class UserServiceImpl implements UserService { private UserDao userDao = new UserDaoImpl(); public void getUser(){ userDao.getUser(); } } 5."/>
+<meta name="twitter:description" content="spring framework的学习与介绍，详细讲解了ioc和aop的概念，基于spring5x，了解了面向bean开发的过程。"/>
 
 
 <link rel="stylesheet" href="/css/semantic.min.css" />
@@ -90,7 +84,7 @@
     <i class="large link bullseye icon dream-flip-toggle" title="Flip it!"></i>
   </div>
   <div class="item">
-    <i class="large link home icon" title="Home" onclick="window.location.href = 'http:\/\/www.kingkiller.cn\/'"></i>
+    <i class="large link home icon" title="Home" onclick="window.location.href = 'http:\/\/www.kingkiller.cn'"></i>
   </div>
   <div class="item">
     <i class="large link icon theme-switch" onclick="themeSwitch()"></i>
@@ -136,8 +130,7 @@
         </h1>
       </header>
 
-      <article class="main"><p>spring的学习与介绍</p>
-<!-- raw HTML omitted -->
+      <article class="main"><p>spring framework的学习与介绍，详细讲解了ioc和aop的概念，基于spring5x，了解了面向bean开发的过程。</p>
 <h1 id="1spring">1.Spring</h1>
 <p>简介:</p>
 <ul>
@@ -1336,6 +1329,12 @@
     
       
       
+      <a class="ui label" href="/tags/ai/" title="Ai">
+        Ai
+      </a>
+    
+      
+      
       <a class="ui label" href="/tags/java/" title="Java">
         Java
       </a>
@@ -1350,6 +1349,12 @@
       
       <a class="ui label" href="/tags/spring/" title="Spring">
         Spring
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/sql/" title="Sql">
+        Sql
       </a>
     
   </section>
@@ -1381,7 +1386,37 @@
             
               <div class="item">
                 <div class="content">
+                  <a class="item" href="/post/mvc/">spring mvc基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mybatis/">Mybatis基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mysql/">Mysql基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/liner/">机器学习(-):一元线性回归</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
                   <a class="item" href="/post/string/">String字符串拼接比较</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/servlet/">Servlet总结</a>
                 </div>
               </div>
             
@@ -1607,7 +1642,7 @@
 </div>
 <script>
   $(document).ready(function () {
-    $.getJSON('http:\/\/www.kingkiller.cn\//index.json', function (data) {
+    $.getJSON('http:\/\/www.kingkiller.cn/index.json', function (data) {
       $('.ui.search').search({
         source: data,
         searchFields: ['title'],

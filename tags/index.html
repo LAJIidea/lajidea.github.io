@@ -24,7 +24,7 @@
 <meta property="og:description" content="soz ceo" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="http://www.kingkiller.cn/tags/" />
-<meta property="og:updated_time" content="2021-01-28T18:00:58+08:00" />
+<meta property="og:updated_time" content="2021-01-29T19:10:13+08:00" />
 
 
 
@@ -77,7 +77,7 @@
     <i class="large link bullseye icon dream-flip-toggle" title="Flip it!"></i>
   </div>
   <div class="item">
-    <i class="large link home icon" title="Home" onclick="window.location.href = 'http:\/\/www.kingkiller.cn\/'"></i>
+    <i class="large link home icon" title="Home" onclick="window.location.href = 'http:\/\/www.kingkiller.cn'"></i>
   </div>
   <div class="item">
     <i class="large link icon theme-switch" onclick="themeSwitch()"></i>
@@ -129,6 +129,12 @@
     
       
       
+      <a class="ui label" href="/tags/ai/" title="Ai">
+        Ai
+      </a>
+    
+      
+      
       <a class="ui label" href="/tags/java/" title="Java">
         Java
       </a>
@@ -143,6 +149,12 @@
       
       <a class="ui label" href="/tags/spring/" title="Spring">
         Spring
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/sql/" title="Sql">
+        Sql
       </a>
     
   </section>
@@ -174,7 +186,37 @@
             
               <div class="item">
                 <div class="content">
+                  <a class="item" href="/post/mvc/">spring mvc基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mybatis/">Mybatis基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mysql/">Mysql基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/liner/">机器学习(-):一元线性回归</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
                   <a class="item" href="/post/string/">String字符串拼接比较</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/servlet/">Servlet总结</a>
                 </div>
               </div>
             
@@ -275,7 +317,7 @@
   <div class="sixteen wide mobile sixteen wide tablet twelve wide computer column">
     <div class="ui segment dream-tags-section">
       <h1 class="ui large header">All Tags<div class="ui grey sub header">
-          3 tags
+          5 tags
         </div>
       </h1>
 
@@ -283,11 +325,34 @@
       
         
         <h2 class="ui medium header">
-          <a href="/tags/java/">Java</a>&nbsp;2 articles</h2>
+          <a href="/tags/ai/">Ai</a>&nbsp;1 article</h2>
         <ul>
           
             <li>
+              <a href="/post/liner/">机器学习(-):一元线性回归</a>
+            </li>
+          
+        </ul>
+      
+        
+        <h2 class="ui medium header">
+          <a href="/tags/java/">Java</a>&nbsp;5 articles</h2>
+        <ul>
+          
+            <li>
+              <a href="/post/mvc/">spring mvc基础</a>
+            </li>
+          
+            <li>
+              <a href="/post/mybatis/">Mybatis基础</a>
+            </li>
+          
+            <li>
               <a href="/post/string/">String字符串拼接比较</a>
+            </li>
+          
+            <li>
+              <a href="/post/servlet/">Servlet总结</a>
             </li>
           
             <li>
@@ -309,11 +374,30 @@
       
         
         <h2 class="ui medium header">
-          <a href="/tags/spring/">Spring</a>&nbsp;1 article</h2>
+          <a href="/tags/spring/">Spring</a>&nbsp;2 articles</h2>
         <ul>
           
             <li>
+              <a href="/post/mvc/">spring mvc基础</a>
+            </li>
+          
+            <li>
               <a href="/post/firstblog/">spring</a>
+            </li>
+          
+        </ul>
+      
+        
+        <h2 class="ui medium header">
+          <a href="/tags/sql/">Sql</a>&nbsp;2 articles</h2>
+        <ul>
+          
+            <li>
+              <a href="/post/mybatis/">Mybatis基础</a>
+            </li>
+          
+            <li>
+              <a href="/post/mysql/">Mysql基础</a>
             </li>
           
         </ul>
@@ -443,7 +527,7 @@
 </div>
 <script>
   $(document).ready(function () {
-    $.getJSON('http:\/\/www.kingkiller.cn\//index.json', function (data) {
+    $.getJSON('http:\/\/www.kingkiller.cn/index.json', function (data) {
       $('.ui.search').search({
         source: data,
         searchFields: ['title'],

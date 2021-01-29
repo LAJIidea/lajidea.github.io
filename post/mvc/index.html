@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>spring mvc基础 | kingkiller’s blog</title>
+
+    
+
+
+
+<meta name="author" content="kingkiller" />
+<meta name="description" content="soz ceo" />
+
+
+
+<meta name="generator" content="Hugo 0.80.0" />
+
+<link rel="canonical" href="http://www.kingkiller.cn/post/mvc/" />
+
+
+<meta property="og:title" content="spring mvc基础" />
+<meta property="og:description" content="了解MVC设计模式的思想,学习spring mvc基础，ssm框架现在虽说没有springboot轻便，但是了解底层基础和演变过程会对boot的学习有很多益处" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://www.kingkiller.cn/post/mvc/" />
+<meta property="article:published_time" content="2021-01-29T19:10:13+08:00" />
+<meta property="article:modified_time" content="2021-01-29T19:10:13+08:00" />
+
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="spring mvc基础"/>
+<meta name="twitter:description" content="了解MVC设计模式的思想,学习spring mvc基础，ssm框架现在虽说没有springboot轻便，但是了解底层基础和演变过程会对boot的学习有很多益处"/>
+
+
+<link rel="stylesheet" href="/css/semantic.min.css" />
+<link rel="stylesheet" href="/css/icomoon.css" />
+<link rel="stylesheet" href="/css/OverlayScrollbars.min.css" />
+<link rel="stylesheet" href="/css/github-markdown.css" />
+<link rel="stylesheet" href="/css/site.css" />
+
+<style>
+  a:hover {
+    text-decoration: underline;
+  }
+
+  
+  a {
+    color: seagreen !important;
+  }
+  
+
+  
+
+  
+  body.default {
+    
+
+    
+    background-image: url(/img/bg0.jpg);
+    
+  }
+  
+
+  
+</style>
+
+    
+
+
+
+
+
+
+    
+  </head>
+
+  <body class="default">
+    
+<nav class="ui secondary inverted menu dream-menu">
+
+  <div class="item">
+    <i class="large link bullseye icon dream-flip-toggle" title="Flip it!"></i>
+  </div>
+  <div class="item">
+    <i class="large link home icon" title="Home" onclick="window.location.href = 'http:\/\/www.kingkiller.cn'"></i>
+  </div>
+  <div class="item">
+    <i class="large link icon theme-switch" onclick="themeSwitch()"></i>
+  </div>
+  
+  <div class="item">
+    <i class="large link search icon" onclick="toggleSearch()"></i>
+  </div>
+  
+</nav>
+
+    <div class="flip-container">
+      <div class="flipper">
+        <section class="front">
+          <div class="dream-max-width">
+            
+<div class="ui centered relaxed grid dream-grid">
+  <div class="sixteen wide mobile sixteen wide tablet twelve wide computer column markdown-body dream-single" id="dream-save-post-as-img">
+    
+    <section class="ui top attached segment">
+      <header>
+        <h1 class="ui large header">
+          spring mvc基础
+          <div class="sub header">
+            @
+            
+              
+                kingkiller
+              
+            
+
+            | 
+                Friday, Jan 29, 2021
+              
+
+            | 3 minutes read
+
+            | Update at
+              
+                Friday, Jan 29, 2021
+              
+          </div>
+        </h1>
+      </header>
+
+      <article class="main"><p>了解MVC设计模式的思想,学习spring mvc基础，ssm框架现在虽说没有springboot轻便，但是了解底层基础和演变过程会对boot的学习有很多益处</p>
+<h1 id="spring-mvc">Spring MVC</h1>
+<h2 id="前期的设计模式">前期的设计模式</h2>
+<h4 id="1模式一model-one">1.模式一(Model One)</h4>
+<p>JSP:JSP的出现既解决了Servlet不适合向外输出网页的问题,也解决了HTML无法展示动态数据的问题!</p>
+<p>​		只有JSP开发项目</p>
+<pre><code>    1. 需要接收请求中的数据
+
+        2. 需要对请求进行处理
+                3. 需要处理业务逻辑
+                            4. 需要访问数据库
+                                    5. 将请求处理的结果展示给用户
+</code></pre>
+<p>要在JSP中完成上面的工作,这就意味着要在JSP中写大量的Java代码,容易造成JSP页面结构的混乱,不利于后期的扩展和维护.</p>
+<h4 id="2模式二model-two">2.模式二(Model Two)</h4>
+<p>Servlet+JavaBean+JSP:</p>
+<p>Bean:在计算机英语中,表示可重用的组件</p>
+<p>JavaBean:广义:使用Java语言编写的可重用的组件</p>
+<p>​				狭义:实体类,用于封装数据的Java类</p>
+<p>​				业务Bean,专门用于处理业务逻辑的Java类</p>
+<h5 id="servlet">Servlet:</h5>
+<ol>
+<li>
+<p>获取请求中的数据</p>
+</li>
+<li>
+<p>调用某一个JavaBean对请求进行处理</p>
+</li>
+<li>
+<p>调用某一个JSP展示请求处理的结果</p>
+</li>
+</ol>
+<h5 id="javabean">JavaBean:</h5>
+<ol>
+<li>
+<p>处理请求</p>
+</li>
+<li>
+<p>处理业务逻辑</p>
+</li>
+<li>
+<p>访问数据</p>
+</li>
+<li>
+<p>封装数据库</p>
+</li>
+</ol>
+<h5 id="jsp">JSP:</h5>
+<p>1.将请求处理的结果展示给用户</p>
+<h2 id="mvc设计模式">MVC设计模式</h2>
+<p>MVC设计模式是一种通用的软件编程思想</p>
+<p>在MVC设计模式中认为,任何软件都可以分为三部分组成:</p>
+<p>1.控制程序流转的控制器(Controller)</p>
+<p>2.封装数据处理的模型(Model)</p>
+<p>3.负责展示数据的视图(View)</p>
+<p>并且在MVC设计思想中要求一个符合MVC设计思想的软件应该保证上面三部分相互独立,互不干扰,每一个部分只负责自己擅长的部分.</p>
+<p>如果某一个模块发生变化,应该尽量做到不影响其他两个模块.这样做的好处是,软件的结构会变的更加的清晰,可读性强.有利于后期的扩张和维护,并且代码可以实现复用.</p>
+<h2 id="javaee经典架构ssm">JavaEE经典架构(SSM)</h2>
+<p><img src="https://img-blog.csdnimg.cn/20200208202713901.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE1MzA1OA==,size_16,color_FFFFFF,t_70" alt=""></p>
+<h2 id="初识springmvc">初识SpringMVC</h2>
+<h4 id="1servlet的缺点">1.Servlet的缺点</h4>
+<p>1.通常情况下,一个Servlet类只负责处理一个请求,若项目中有成百上千个处理,就要成百上千个Servlet类,这样会使Servlet类暴涨</p>
+<p>2.在Servlet3.0版本之前,每一个Servlet都需要在web.xml进行配置</p>
+<p>3.当通过客户端提交参数到服务器,通过Servlet进行接收,无论数据本身是什么格式,在Servlet中一律按照字符串进行接收,后期需要进行类型转换,复杂类型还需要特殊处理</p>
+<p>4.Servlet具有容器依赖性,必须放在服务器中运行,不利于单元测试</p>
+<h4 id="2springmvc简介">2.SpringMVC简介</h4>
+<p>SpringMVC是一个spring框架的一个模块,spring和springmvc无需中间层
+<img src="https://img-blog.csdnimg.cn/20200208202739300.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE1MzA1OA==,size_16,color_FFFFFF,t_70" alt=""></p>
+<h4 id="3快速入门">3.快速入门</h4>
+<p>1.创建Maven web工程SpringMVCdemo</p>
+<p>2.导入相关依赖</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;!-- 集中定义依赖版本号 --&gt;</span>
+<span style="color:#f92672">&lt;properties&gt;</span>
+	<span style="color:#f92672">&lt;junit.version&gt;</span>4.10<span style="color:#f92672">&lt;/junit.version&gt;</span>
+	<span style="color:#f92672">&lt;spring.version&gt;</span>4.1.3.RELEASE<span style="color:#f92672">&lt;/spring.version&gt;</span>
+<span style="color:#f92672">&lt;/properties&gt;</span>
+<span style="color:#f92672">&lt;dependencies&gt;</span>
+	<span style="color:#75715e">&lt;!-- 单元测试 --&gt;</span>
+	<span style="color:#f92672">&lt;dependency&gt;</span>
+		<span style="color:#f92672">&lt;groupId&gt;</span>junit<span style="color:#f92672">&lt;/groupId&gt;</span>
+		<span style="color:#f92672">&lt;artifactId&gt;</span>junit<span style="color:#f92672">&lt;/artifactId&gt;</span>
+		<span style="color:#f92672">&lt;version&gt;</span>${junit.version}<span style="color:#f92672">&lt;/version&gt;</span>
+		<span style="color:#f92672">&lt;scope&gt;</span>test<span style="color:#f92672">&lt;/scope&gt;</span>
+	<span style="color:#f92672">&lt;/dependency&gt;</span>
+
+	<span style="color:#75715e">&lt;!-- SpringMVC --&gt;</span>
+	<span style="color:#f92672">&lt;dependency&gt;</span>
+		<span style="color:#f92672">&lt;groupId&gt;</span>org.springframework<span style="color:#f92672">&lt;/groupId&gt;</span>
+		<span style="color:#f92672">&lt;artifactId&gt;</span>spring-webmvc<span style="color:#f92672">&lt;/artifactId&gt;</span>
+		<span style="color:#f92672">&lt;version&gt;</span>${spring.version}<span style="color:#f92672">&lt;/version&gt;</span>
+	<span style="color:#f92672">&lt;/dependency&gt;</span>
+	
+	<span style="color:#75715e">&lt;!-- Servlet支持Request和Response --&gt;</span>
+	<span style="color:#f92672">&lt;dependency&gt;</span>
+		<span style="color:#f92672">&lt;groupId&gt;</span>javax.servlet<span style="color:#f92672">&lt;/groupId&gt;</span>
+		<span style="color:#f92672">&lt;artifactId&gt;</span>servlet-api<span style="color:#f92672">&lt;/artifactId&gt;</span>
+		<span style="color:#f92672">&lt;version&gt;</span>2.4<span style="color:#f92672">&lt;/version&gt;</span>
+		<span style="color:#f92672">&lt;scope&gt;</span>provided<span style="color:#f92672">&lt;/scope&gt;</span>
+	<span style="color:#f92672">&lt;/dependency&gt;</span>
+	
+	<span style="color:#75715e">&lt;!-- java对象转换json的工具类 --&gt;</span>
+	<span style="color:#f92672">&lt;dependency&gt;</span>
+		<span style="color:#f92672">&lt;groupId&gt;</span>com.fasterxml.jackson.core<span style="color:#f92672">&lt;/groupId&gt;</span>
+		<span style="color:#f92672">&lt;artifactId&gt;</span>jackson-databind<span style="color:#f92672">&lt;/artifactId&gt;</span>
+		<span style="color:#f92672">&lt;version&gt;</span>2.5.1<span style="color:#f92672">&lt;/version&gt;</span>
+	<span style="color:#f92672">&lt;/dependency&gt;</span>
+<span style="color:#f92672">&lt;/dependencies&gt;</span>
+</code></pre></div><p>3.配置web.xml文件</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#f92672">&lt;web-app</span> <span style="color:#a6e22e">xmlns:xsi=</span><span style="color:#e6db74">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span> <span style="color:#a6e22e">xmlns=</span><span style="color:#e6db74">&#34;http://java.sun.com/xml/ns/javaee&#34;</span> <span style="color:#a6e22e">xsi:schemaLocation=</span><span style="color:#e6db74">&#34;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&#34;</span> <span style="color:#a6e22e">version=</span><span style="color:#e6db74">&#34;2.5&#34;</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#f92672">&lt;display-name&gt;</span>SpringMVCdemo<span style="color:#f92672">&lt;/display-name&gt;</span>
+  <span style="color:#f92672">&lt;welcome-file-list&gt;</span>
+    <span style="color:#f92672">&lt;welcome-file&gt;</span>index.html<span style="color:#f92672">&lt;/welcome-file&gt;</span>
+    <span style="color:#f92672">&lt;welcome-file&gt;</span>index.htm<span style="color:#f92672">&lt;/welcome-file&gt;</span>
+    <span style="color:#f92672">&lt;welcome-file&gt;</span>index.jsp<span style="color:#f92672">&lt;/welcome-file&gt;</span>
+    <span style="color:#f92672">&lt;welcome-file&gt;</span>default.html<span style="color:#f92672">&lt;/welcome-file&gt;</span>
+    <span style="color:#f92672">&lt;welcome-file&gt;</span>default.htm<span style="color:#f92672">&lt;/welcome-file&gt;</span>
+    <span style="color:#f92672">&lt;welcome-file&gt;</span>default.jsp<span style="color:#f92672">&lt;/welcome-file&gt;</span>
+  <span style="color:#f92672">&lt;/welcome-file-list&gt;</span>
+  <span style="color:#75715e">&lt;!-- 配置前端控制器DispatcherServlet --&gt;</span>
+  <span style="color:#f92672">&lt;servlet&gt;</span>
+  	<span style="color:#f92672">&lt;servlet-name&gt;</span>springmvc<span style="color:#f92672">&lt;/servlet-name&gt;</span>
+  	<span style="color:#f92672">&lt;servlet-class&gt;</span>org.springframework.web.servlet.DispatcherServlet<span style="color:#f92672">&lt;/servlet-class&gt;</span>
+		<span style="color:#75715e">&lt;!-- 配置springmvc核心配置文件的位置，默认Springmvc的配置文件是在WEB-INF目录下，默认的名字为springmvc-servlet.xml，如果要放在其他目录，则需要指定如下配置：
+</span><span style="color:#75715e">		--&gt;</span>
+		<span style="color:#f92672">&lt;init-param&gt;</span>
+			<span style="color:#f92672">&lt;param-name&gt;</span>contextConfigLocation<span style="color:#f92672">&lt;/param-name&gt;</span>
+			<span style="color:#f92672">&lt;param-value&gt;</span>classpath:springmvc-config.xml<span style="color:#f92672">&lt;/param-value&gt;</span>
+		<span style="color:#f92672">&lt;/init-param&gt;</span>		
+  <span style="color:#f92672">&lt;/servlet&gt;</span>
+  <span style="color:#75715e">&lt;!-- 配置前端控制器拦截除JSP以外的所有的请求 --&gt;</span>
+  <span style="color:#f92672">&lt;servlet-mapping&gt;</span>
+  	<span style="color:#f92672">&lt;servlet-name&gt;</span>springmvc<span style="color:#f92672">&lt;/servlet-name&gt;</span>
+  	<span style="color:#f92672">&lt;url-pattern&gt;</span>/<span style="color:#f92672">&lt;/url-pattern&gt;</span>
+  <span style="color:#f92672">&lt;/servlet-mapping&gt;</span>
+<span style="color:#f92672">&lt;/web-app&gt;</span>
+</code></pre></div><p>4.创建WEB-INF/pages/home.jsp文件</p>
+<p>5.在src/main/java中创建com.kingkiller.controller包,在包中创建HelloController</p>
+<p>6.配置核心配置文件</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#f92672">&lt;beans</span> <span style="color:#a6e22e">xmlns=</span><span style="color:#e6db74">&#34;http://www.springframework.org/schema/beans&#34;</span>
+	<span style="color:#a6e22e">xmlns:xsi=</span><span style="color:#e6db74">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span> <span style="color:#a6e22e">xmlns:mvc=</span><span style="color:#e6db74">&#34;http://www.springframework.org/schema/mvc&#34;</span>	<span style="color:#a6e22e">xmlns:context=</span><span style="color:#e6db74">&#34;http://www.springframework.org/schema/context&#34;</span>	<span style="color:#a6e22e">xsi:schemaLocation=</span><span style="color:#e6db74">&#34;http://www.springframework.org/schema/mvc						http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd						http://www.springframework.org/schema/beans			http://www.springframework.org/schema/beans/spring-beans-4.0.xsd						http://www.springframework.org/schema/context     		http://www.springframework.org/schema/context/spring-context-4.0.xsd&#34;</span><span style="color:#f92672">&gt;</span>
+	<span style="color:#75715e">&lt;!-- 1.配置前端控制器放行静态资源(html/css/js等，否则静态资源将无法访问) --&gt;</span>
+	<span style="color:#f92672">&lt;mvc:default-servlet-handler/&gt;</span>
+	<span style="color:#75715e">&lt;!-- 2.配置注解驱动，用于识别注解（比如@Controller） --&gt;</span>
+	<span style="color:#f92672">&lt;mvc:annotation-driven&gt;&lt;/mvc:annotation-driven&gt;</span>
+	<span style="color:#75715e">&lt;!-- 3.配置需要扫描的包：spring自动去扫描 base-package 下的类，
+</span><span style="color:#75715e">		如果扫描到的类上有 @Controller、@Service、@Component等注解，
+</span><span style="color:#75715e">		将会自动将类注册为bean 
+</span><span style="color:#75715e">	 --&gt;</span>
+	<span style="color:#f92672">&lt;context:component-scan</span> <span style="color:#a6e22e">base-package=</span><span style="color:#e6db74">&#34;com.kingkiller.controller&#34;</span><span style="color:#f92672">&gt;</span>
+	<span style="color:#f92672">&lt;/context:component-scan&gt;</span>
+	<span style="color:#75715e">&lt;!-- 4.配置内部资源视图解析器
+</span><span style="color:#75715e">		prefix:配置路径前缀
+</span><span style="color:#75715e">		suffix:配置文件后缀
+</span><span style="color:#75715e">	 --&gt;</span>
+	<span style="color:#f92672">&lt;bean</span> <span style="color:#a6e22e">class=</span><span style="color:#e6db74">&#34;org.springframework.web.servlet.view.InternalResourceViewResolver&#34;</span><span style="color:#f92672">&gt;</span>
+		<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;prefix&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;/WEB-INF/pages/&#34;</span><span style="color:#f92672">/&gt;</span>
+		<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;suffix&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;.jsp&#34;</span><span style="color:#f92672">/&gt;</span>
+	<span style="color:#f92672">&lt;/bean&gt;</span>
+<span style="color:#f92672">&lt;/beans&gt;</span>
+</code></pre></div><p>6.编写HelloController类,完成需求,并运行测试</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Controller</span>
+<span style="color:#75715e">//@RequestMapping(&#34;/HelloController&#34;)
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">HelloController</span> <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/hello&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">testHello</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;hello springmvc&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;home&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="springmvc参数绑定">SpringMVC参数绑定</h2>
+<h4 id="1简单类型参数绑定">1.简单类型参数绑定</h4>
+<p>1.需求:</p>
+<p>​		浏览器请求:localhost:8080/SpringMVCdemo/testParam1?name=张飞&amp;age=20&amp;addr=中国</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> 	<span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/testParam1&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">testParam1</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">,</span>Integer age<span style="color:#f92672">,</span>String addr<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;name=&#34;</span><span style="color:#f92672">+</span>name<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;home&#34;</span><span style="color:#f92672">;</span><span style="color:#75715e">//其实是一个转发的过程
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+</code></pre></div><p>2.包装类型参数绑定:</p>
+<p>​		浏览器请求:localhost:8080/SpringMVCdemo/testParam2?name=刘备&amp;age=18&amp;addr=中国</p>
+<p>在com.kingkiller.pojo包中创建User类</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.kingkiller.pojo<span style="color:#f92672">;</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">User</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">private</span> String name<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> age<span style="color:#f92672">;</span>
+    <span style="color:#66d9ef">private</span> String addr<span style="color:#f92672">;</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div><p>注意:这里需自己补全成员变量的get和set方法,以及无参构造和有参构造</p>
+<p>编写测试类</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/testParam2&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">testParam2</span><span style="color:#f92672">(</span>User user<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;name=&#34;</span><span style="color:#f92672">+</span>user<span style="color:#f92672">.</span><span style="color:#a6e22e">getName</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;age=&#34;</span><span style="color:#f92672">+</span>user<span style="color:#f92672">.</span><span style="color:#a6e22e">getAge</span><span style="color:#f92672">());</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;addr=&#34;</span><span style="color:#f92672">+</span>user<span style="color:#f92672">.</span><span style="color:#a6e22e">getAddr</span><span style="color:#f92672">());</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;home&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>3.日期类型参数绑定:</p>
+<p>​		浏览器请求:localhost:8080/SringMVCdemo/testParam3?date=2020/2/8 13:00:00</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/testParam3&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">testParam3</span><span style="color:#f92672">(</span>Date date<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;data=&#34;</span><span style="color:#f92672">+</span>date<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;home&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>注意:如果在请求中用的是date=2020-2-8的形式,可能会出现400错误:请求参数类型不匹配.因为SpringMVC底层默认使用/来分割.我们可以通过更改底层代码实现的方式来解决:在Cotroller类中添加自定义日期转换格式的代码:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#75715e">/* 自定义日期转换格式 */</span>
+	<span style="color:#a6e22e">@InitBinder</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">InitBinder</span> <span style="color:#f92672">(</span>ServletRequestDataBinder binder<span style="color:#f92672">){</span>
+		binder<span style="color:#f92672">.</span><span style="color:#a6e22e">registerCustomEditor</span><span style="color:#f92672">(</span>java<span style="color:#f92672">.</span><span style="color:#a6e22e">util</span><span style="color:#f92672">.</span><span style="color:#a6e22e">Date</span><span style="color:#f92672">.</span><span style="color:#a6e22e">class</span><span style="color:#f92672">,</span> 
+			<span style="color:#66d9ef">new</span> CustomDateEditor<span style="color:#f92672">(</span><span style="color:#66d9ef">new</span> SimpleDateFormat<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;yyyy-MM-dd&#34;</span><span style="color:#f92672">),</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">)</span>
+		<span style="color:#f92672">);</span>
+	<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="跳转和乱码处理">跳转和乱码处理</h2>
+<h4 id="1请求转发">1.请求转发</h4>
+<p>其实return &ldquo;home&rdquo;;本身就是一个请求转发,将请求转发到home.jsp,因为请求转发是一次1请求一次响应,所以浏览器地址栏不会发生改变,显示的依然是@RequestMapping后配置的路径</p>
+<p>我们还可以通过return &ldquo;forward:**&ldquo;的方式来将请求转发到其他的方法中</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/testForward&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">testForward</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;testForward方法执行了&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;forward:/hello&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>在浏览器中输入localhost:8080/SpringMVCdemo/testForward最终会跳转到home.jsp,但浏览器地址依然是testForword,说明了请求转发只会请求一次</p>
+<h4 id="2重定向">2.重定向</h4>
+<p>通过return &ldquo;redirect:/**&ldquo;的方式可以完成请求的重定向</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/testRedirect&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">testRedirect</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;testRedirect方法执行了&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;redirect:/hello&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>在浏览器中输入localhost:8080/SpringMVCdemo/testRedirect,最终结构会跳转到home.jsp,但浏览器地址会改成/hello,因为请求重定向将地址定向到了/hello,testHello方法又发生了请求转发跳转到home.jsp</p>
+<h4 id="3乱码问题">3.乱码问题:</h4>
+<p>​	Servlet:</p>
+<ol>
+<li>
+<p>如果是GET提交,并且tomcat为8.0以后的版本,tomcat底层已经处理了GET提交的中文乱码问题,所以GET提交在tomcat8.0以后的版本中没有乱码!</p>
+</li>
+<li>
+<p>如果是POST提交,无论实哪个版本的tomcat服务器,获取中文参数时都会有乱码问题</p>
+<p>解决:request.setCharacterEncoding(&ldquo;utf-8&rdquo;)</p>
+<p>springmvc中提供了处理POST提交中文参数乱码方法:在web.xml文件中配置一个乱码处理过滤器.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;filter&gt;</span>
+   <span style="color:#f92672">&lt;filter-name&gt;</span>encodingFilter<span style="color:#f92672">&lt;/filter-name&gt;</span>
+   <span style="color:#f92672">&lt;filter-class&gt;</span>org.springframework.web.filter.CharacterEncodingFilter<span style="color:#f92672">&lt;/filter-class&gt;</span>
+   <span style="color:#f92672">&lt;init-param&gt;</span>
+       <span style="color:#f92672">&lt;param-name&gt;</span>encoding<span style="color:#f92672">&lt;/param-name&gt;</span>
+       <span style="color:#f92672">&lt;param-value&gt;</span>UTF8<span style="color:#f92672">&lt;/param-value&gt;</span>
+   <span style="color:#f92672">&lt;/init-param&gt;</span>
+<span style="color:#f92672">&lt;/filter&gt;</span>
+<span style="color:#f92672">&lt;filter-mapping&gt;</span>
+   <span style="color:#f92672">&lt;filter-name&gt;</span>encodingFilter<span style="color:#f92672">&lt;/filter-name&gt;</span>
+   <span style="color:#f92672">&lt;url-pattern&gt;</span>/*<span style="color:#f92672">&lt;/url-pattern&gt;</span>
+<span style="color:#f92672">&lt;/filter-mapping&gt;</span>
+</code></pre></div><p>我们创建在webapps下创建form.html进行测试(注意:不能建在WEB-INF文件里,应建在webapps文件夹内WEB-INF文件夹外)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span>&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+&lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>&gt;
+&lt;<span style="color:#f92672">title</span>&gt;Insert title here&lt;/<span style="color:#f92672">title</span>&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
+&lt;<span style="color:#f92672">body</span>&gt;
+   &lt;<span style="color:#f92672">h1</span>&gt;POST提交&lt;/<span style="color:#f92672">h1</span>&gt;
+   &lt;<span style="color:#f92672">form</span> <span style="color:#a6e22e">action</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;http://localhost:8080/SpringMVCdemo/testParam5&#34;</span> <span style="color:#a6e22e">method</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;POST&#34;</span>&gt;
+       用户名:&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;user&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;username&#34;</span>/&gt;
+       爱好: &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;checkbox&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;like&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;篮球&#34;</span>/&gt;篮球
+            &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;checkbox&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;like&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;足球&#34;</span>/&gt;足球
+       &lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;submit&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;提交&#34;</span>&gt;
+   &lt;/<span style="color:#f92672">form</span>&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div><p>在Cotroller类中编写测试方法:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/testParam5&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">testParam5</span><span style="color:#f92672">(</span>String user<span style="color:#f92672">,</span>String<span style="color:#f92672">[]</span> like<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;user:&#34;</span><span style="color:#f92672">+</span>user<span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;like:&#34;</span><span style="color:#f92672">+</span>Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">toString</span><span style="color:#f92672">(</span>like<span style="color:#f92672">));</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;home&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>会发现控制台中正确的输出了中文</p>
+</li>
+</ol>
+<h2 id="springmvc响应数据">SpringMVC响应数据</h2>
+<h4 id="1model的使用">1.Model的使用</h4>
+<p>​		从Servlet带数据到JSP:(通过request域带数据)</p>
+<p>​					request.setAttribute(&ldquo;xx&rdquo;,xxx);</p>
+<p>​					request.getRequestDispatcher(&ldquo;xxx&rdquo;).forward(req,res)</p>
+<p>​		从Controller带数据到JSP:(通过Model带数据)</p>
+<p>​					model.addAttribute(&ldquo;xx&rdquo;,xxx);</p>
+<p>第一种:以对象的方式响应数据</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/testModel&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">testModel</span><span style="color:#f92672">(</span>Model model<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//声明一个User对象,将User对象存入Model中
+</span><span style="color:#75715e"></span>        User u1 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> User<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;张三&#34;</span><span style="color:#f92672">,</span>20<span style="color:#f92672">,</span><span style="color:#e6db74">&#34;北京&#34;</span><span style="color:#f92672">);</span>
+        model<span style="color:#f92672">.</span><span style="color:#a6e22e">addAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;user&#34;</span><span style="color:#f92672">,</span>u1<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//转发到home.jsp
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;home&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>第二种:以集合的方式响应数据</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/testModel2&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">testModel2</span><span style="color:#f92672">(</span>Model model<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//声明一个User对象集合
+</span><span style="color:#75715e"></span>        User u1 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> User<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;king&#34;</span><span style="color:#f92672">,</span>18<span style="color:#f92672">,</span><span style="color:#e6db74">&#34;china&#34;</span><span style="color:#f92672">);</span>
+        User u2 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> User<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;queen&#34;</span><span style="color:#f92672">,</span>20<span style="color:#f92672">,</span><span style="color:#e6db74">&#34;china&#34;</span><span style="color:#f92672">);</span>
+        List<span style="color:#f92672">&lt;</span>User<span style="color:#f92672">&gt;</span> list <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList<span style="color:#f92672">&lt;&gt;();</span>
+        list<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>u2<span style="color:#f92672">);</span>
+        list<span style="color:#f92672">.</span><span style="color:#a6e22e">add</span><span style="color:#f92672">(</span>u1<span style="color:#f92672">);</span>
+        model<span style="color:#f92672">.</span><span style="color:#a6e22e">addAttribute</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;ulist&#34;</span><span style="color:#f92672">,</span>list<span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;home&#34;</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>在hmoe.jsp中通过EL的方式读取数据并输出</p>
+<pre><code class="language-jsp" data-lang="jsp">&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot;
+    pageEncoding=&quot;UTF-8&quot;%&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Insert title here&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+	&lt;h1&gt;springmvc...home.jsp&lt;/h1&gt;
+	${ user.name }&lt;br/&gt;
+	${ user.age } 
+	&lt;hr/&gt;
+	${ ulist[0].name }
+	${ ulist[1].name }
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h4 id="2返回json数据">2.返回JSON数据</h4>
+<p>JSON是JS对象格式转换过来的一种非常流行的数据传输/交换格式</p>
+<p>JSON中包含的数据结构是key-value格式(键值对)</p>
+<p>1.JSON是用花括号括起来的一组内容,其中的数据是key-value结构</p>
+<p>2.JSON中的key只能是字符串(可以加上数组)</p>
+<p>可以通过@ResponseBody注解的方法来将返回的数据转换成JSON的格式再响应</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">	<span style="color:#a6e22e">@RequestMapping</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/testJSON&#34;</span><span style="color:#f92672">)</span>
+    <span style="color:#a6e22e">@ResponseBody</span>
+    <span style="color:#66d9ef">public</span> User <span style="color:#a6e22e">testJSON</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//声明一个User对象,将User对象以JSON格式返回
+</span><span style="color:#75715e"></span>        User u1 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> User<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;张三&#34;</span><span style="color:#f92672">,</span>20<span style="color:#f92672">,</span><span style="color:#e6db74">&#34;北京&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">return</span> u1<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div></article>
+    </section>
+
+    <footer class="ui attached segment dream-tags" data-html2canvas-ignore>
+      
+        
+          <a class="ui label" href="/tags/java" title="java">java</a>
+        
+          <a class="ui label" href="/tags/spring" title="spring">spring</a>
+        
+      
+      <div
+        class="ui label"
+        style="float: right; cursor: pointer;"
+        onclick="savePostAsImg()">
+        <i class="save icon"></i>Save as image
+      </div>
+    </footer>
+
+    
+
+    
+    
+    
+
+    
+
+  </div>
+  <aside class="sixteen wide mobile sixteen wide tablet four wide computer column dream-single-aside">
+    
+    
+      <div class="ui segment toc">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#前期的设计模式">前期的设计模式</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#mvc设计模式">MVC设计模式</a></li>
+    <li><a href="#javaee经典架构ssm">JavaEE经典架构(SSM)</a></li>
+    <li><a href="#初识springmvc">初识SpringMVC</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#springmvc参数绑定">SpringMVC参数绑定</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#跳转和乱码处理">跳转和乱码处理</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#springmvc响应数据">SpringMVC响应数据</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+      </div>
+    
+
+    <article class="dream-header">
+  <section class="ui top attached center aligned segment">
+    <div class="ui small circular image">
+      
+        <img src="/img/avatar.jpg">
+      
+    </div>
+
+    
+    <h1 class="ui medium header">
+    
+      kingkiller&#39;s blog
+      <div class="sub header" style="margin-top: 0.5rem;"></div>
+    
+    </h1>
+    
+
+    <div class="ui horizontal list">
+      
+      <a class="item" href="/tags">
+        <i class="tags icon" title="All Tags"></i>
+      </a>
+      <a class="item" href="/categories">
+        <i class="th list icon" title="All Categories"></i>
+      </a>
+    </div>
+  </section>
+
+  
+  <section class="ui attached center aligned segment dream-tags">
+    
+      
+      
+      <a class="ui label" href="/tags/ai/" title="Ai">
+        Ai
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/java/" title="Java">
+        Java
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/review/" title="Review">
+        Review
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/spring/" title="Spring">
+        Spring
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/sql/" title="Sql">
+        Sql
+      </a>
+    
+  </section>
+  
+
+  
+  <section class="ui attached segment dream-categories">
+    <div class="ui accordion">
+      
+      
+      
+      
+      
+
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/code/" title="Code">
+              Code
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mvc/">spring mvc基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mybatis/">Mybatis基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mysql/">Mysql基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/liner/">机器学习(-):一元线性回归</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/string/">String字符串拼接比较</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/servlet/">Servlet总结</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstblog/">spring</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/film/" title="Film">
+              Film
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstflimreview/">2021春节档前瞻</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+
+      
+    </div>
+  </section>
+  
+
+  <section class="ui attached segment header-socials">
+    <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class=" mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class=" linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class=" github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+  </section>
+
+  <section class="ui bottom attached center aligned segment">
+    
+      <p>© 2021 kingkiller’s blog</p>
+    
+
+    <p>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> with theme <a href="https://github.com/g1eny0ung/hugo-theme-dream" target="_blank">Dream</a>.</p>
+
+    
+  </section>
+</article>
+
+  </aside>
+</div>
+
+          </div>
+        </section>
+        <section class="back">
+          <div class="dream-max-width">
+            <div class="ui centered relaxed grid dream-grid dream-back">
+  
+  
+  
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    <article>
+      <div class="ui top attached segment">
+        <h3 class="ui header">Social Links</h3>
+      </div>
+      <div class="ui bottom attached segment">
+        <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class="large mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class="large linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class="large github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+      </div>
+    </article>
+  </section>
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    
+  </section>
+
+  
+    
+  
+</div>
+
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+  window.defaultDark =  null 
+  window.backgroundDark =  null 
+  window.backgroundImageDark =  null 
+  window.darkNav =  true 
+  window.hasTwitterEmbed =  null 
+
+  if (window.hasTwitterEmbed) {
+    
+    window.twttr = (function (d, s, id) {
+      var js,
+        fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {}
+      if (d.getElementById(id)) return t
+      js = d.createElement(s)
+      js.id = id
+      js.src = 'https://platform.twitter.com/widgets.js'
+      fjs.parentNode.insertBefore(js, fjs)
+
+      t._e = []
+      t.ready = function (f) {
+        t._e.push(f)
+      }
+
+      return t
+    })(document, 'script', 'twitter-wjs')
+  }
+</script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/semantic.min.js"></script>
+<script src="/js/jquery.overlayScrollbars.min.js"></script>
+<script src="/js/header.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/theme.js"></script>
+
+    
+<script src="/js/html2canvas.min.js"></script>
+<script src="/js/post.js"></script>
+
+
+
+
+
+    
+      <div class="ui inverted segment" id="dream-search">
+  <div class="ui search">
+    <div class="ui transparent input">
+      <input class="prompt" type="text" placeholder="Search" />
+    </div>
+    <div class="results"></div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    $.getJSON('http:\/\/www.kingkiller.cn/index.json', function (data) {
+      $('.ui.search').search({
+        source: data,
+        searchFields: ['title'],
+        showNoResults: true,
+      })
+    })
+  })
+</script>
+<script src="/js/search.js"></script>
+
+    
+
+    
+
+    
+  </body>
+</html>

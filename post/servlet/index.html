@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Servlet总结 | kingkiller’s blog</title>
+
+    
+
+
+
+<meta name="author" content="kingkiller" />
+<meta name="description" content="soz ceo" />
+
+
+
+<meta name="generator" content="Hugo 0.80.0" />
+
+<link rel="canonical" href="http://www.kingkiller.cn/post/servlet/" />
+
+
+<meta property="og:title" content="Servlet总结" />
+<meta property="og:description" content="javaee 中servlet的简单教学，虽说j2ee已经是遥远时代，但是java web开发依然无法离开servlet，从底层学起，详细了解web实际的运行过程，会对将来学习框架更有帮助" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://www.kingkiller.cn/post/servlet/" />
+<meta property="article:published_time" content="2021-01-28T17:09:18+08:00" />
+<meta property="article:modified_time" content="2021-01-28T17:09:18+08:00" />
+
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Servlet总结"/>
+<meta name="twitter:description" content="javaee 中servlet的简单教学，虽说j2ee已经是遥远时代，但是java web开发依然无法离开servlet，从底层学起，详细了解web实际的运行过程，会对将来学习框架更有帮助"/>
+
+
+<link rel="stylesheet" href="/css/semantic.min.css" />
+<link rel="stylesheet" href="/css/icomoon.css" />
+<link rel="stylesheet" href="/css/OverlayScrollbars.min.css" />
+<link rel="stylesheet" href="/css/github-markdown.css" />
+<link rel="stylesheet" href="/css/site.css" />
+
+<style>
+  a:hover {
+    text-decoration: underline;
+  }
+
+  
+  a {
+    color: seagreen !important;
+  }
+  
+
+  
+
+  
+  body.default {
+    
+
+    
+    background-image: url(/img/bg0.jpg);
+    
+  }
+  
+
+  
+</style>
+
+    
+
+
+
+
+
+
+    
+  </head>
+
+  <body class="default">
+    
+<nav class="ui secondary inverted menu dream-menu">
+
+  <div class="item">
+    <i class="large link bullseye icon dream-flip-toggle" title="Flip it!"></i>
+  </div>
+  <div class="item">
+    <i class="large link home icon" title="Home" onclick="window.location.href = 'http:\/\/www.kingkiller.cn'"></i>
+  </div>
+  <div class="item">
+    <i class="large link icon theme-switch" onclick="themeSwitch()"></i>
+  </div>
+  
+  <div class="item">
+    <i class="large link search icon" onclick="toggleSearch()"></i>
+  </div>
+  
+</nav>
+
+    <div class="flip-container">
+      <div class="flipper">
+        <section class="front">
+          <div class="dream-max-width">
+            
+<div class="ui centered relaxed grid dream-grid">
+  <div class="sixteen wide mobile sixteen wide tablet twelve wide computer column markdown-body dream-single" id="dream-save-post-as-img">
+    
+    <section class="ui top attached segment">
+      <header>
+        <h1 class="ui large header">
+          Servlet总结
+          <div class="sub header">
+            @
+            
+              
+                kingkiller
+              
+            
+
+            | 
+                Thursday, Jan 28, 2021
+              
+
+            | 6 minutes read
+
+            | Update at
+              
+                Thursday, Jan 28, 2021
+              
+          </div>
+        </h1>
+      </header>
+
+      <article class="main"><p>javaee 中servlet的简单教学，虽说j2ee已经是遥远时代，但是java web开发依然无法离开servlet，从底层学起，详细了解web实际的运行过程，会对将来学习框架更有帮助</p>
+<h1 id="servlet总结">Servlet总结</h1>
+<h2 id="1servlet接口">1.Servlet接口</h2>
+<p><em>创建HelloServlet实现Servlet接口,作为实例代码</em></p>
+<h4 id="1servlet生命周期方法以下方法都是servlet容器负责调用tomcat就是一个servlet容器">1.Servlet生命周期方法:以下方法都是Servlet容器负责调用(tomcat就是一个Servlet容器)</h4>
+<p>​	1.构造方法</p>
+<p>​	只要第一次请求Servlet时,创建实例,调用构造器.说明Servlet是单实例的</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#66d9ef">public</span> <span style="color:#a6e22e">HelloServlet</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated constructor stub
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;HelloServlet&#39;s constructor&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>​	2.init()方法:只被调用一次,在创建好实例后立即被调用.用于初始化当前的构造方法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">  <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>ServletConfig config<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>3.service()方法:被调用多次,每次请求都会调用service方法.实际用于响应请求</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest req<span style="color:#f92672">,</span> ServletResponse res<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;service&#34;</span><span style="color:#f92672">);</span>
+        
+    <span style="color:#f92672">}</span>
+</code></pre></div><p>4.destroy()方法:只被调用一次,在当前Servlet所在的WEB应用被卸载前调用.用于释放当前Servlet所占用的资源</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">destroy</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;destroy&#34;</span><span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="2servlet配置webxml">2.servlet配置web.xml</h4>
+<p>每创建一个Servlet需要在web.xml中配置相关信息</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;servlet&gt;</span>
+	<span style="color:#75715e">&lt;!-- Servlet的名字 --&gt;</span>
+    <span style="color:#f92672">&lt;servlet-name&gt;</span>helloServlet<span style="color:#f92672">&lt;/servlet-name&gt;</span>
+    <span style="color:#75715e">&lt;!-- Servlet的java文件的路径 --&gt;</span>
+    <span style="color:#f92672">&lt;servlet-class&gt;</span>com.kingkiller.HelloServlet<span style="color:#f92672">&lt;/servlet-class&gt;</span>
+  <span style="color:#f92672">&lt;/servlet&gt;</span>
+  <span style="color:#f92672">&lt;servlet-mapping&gt;</span>
+      <span style="color:#75715e">&lt;!-- Servlet的名字,需和上面的相同 --&gt;</span>
+    <span style="color:#f92672">&lt;servlet-name&gt;</span>helloServlet<span style="color:#f92672">&lt;/servlet-name&gt;</span>
+      <span style="color:#75715e">&lt;!-- Servlet的url路径 --&gt;</span>
+    <span style="color:#f92672">&lt;url-pattern&gt;</span>/hello<span style="color:#f92672">&lt;/url-pattern&gt;</span>
+  <span style="color:#f92672">&lt;/servlet-mapping&gt;</span>
+</code></pre></div><p><em>load-on-startup参数</em>:</p>
+<p>1.配置在servlet节点中
+2.可以指定Servlet被创建的时机，若为负数，则在第一次请求时被创建，若为0或正数，则在当前WEB应用被Servlet容器加载时创建实例，且数值越小越早被创建</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml">  <span style="color:#f92672">&lt;servlet&gt;</span>
+    <span style="color:#f92672">&lt;servlet-name&gt;</span>helloServlet<span style="color:#f92672">&lt;/servlet-name&gt;</span>
+    <span style="color:#f92672">&lt;servlet-class&gt;</span>com.kingkiller.HelloServlet<span style="color:#f92672">&lt;/servlet-class&gt;</span>
+    <span style="color:#f92672">&lt;load-on-startup&gt;</span>1<span style="color:#f92672">&lt;/load-on-startup&gt;</span>
+  <span style="color:#f92672">&lt;/servlet&gt;</span>
+</code></pre></div><h4 id="3servlet映射的细节">3..Servlet映射的细节</h4>
+<p>1.同一个Servlet可以被映射到多个URL上，即多个<!-- raw HTML omitted -->元素的<!-- raw HTML omitted -->子元素的设置可以是同一个Servlet的注册名。
+2.在Servlet映射到URL中也可以使用<em>通配符，但是只能有两种固定的格式，一种格式是&quot;</em>.拓展名&quot;，另一种格式是以正斜杠(/)开头并以&quot;/*&ldquo;结尾</p>
+<h2 id="2servletconfig">2.ServletConfig</h2>
+<p>封装了Servlet的配置信息,并且可以获取ServletContext对象</p>
+<h4 id="1获取参数的方法">1.获取参数的方法</h4>
+<p>​	1.getInitParameter(String name):获取指定参数名的初始化参数</p>
+<p>​	2.getInitParameterNames():获取参数名组成的Enumeration对象</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>ServletConfig config<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        String user <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getInitParameter</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;user&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;user:&#34;</span><span style="color:#f92672">+</span>user<span style="color:#f92672">);</span>
+        Enumeration<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> names <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getInitParameterNames</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>names<span style="color:#f92672">.</span><span style="color:#a6e22e">hasMoreElements</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            String name <span style="color:#f92672">=</span> names<span style="color:#f92672">.</span><span style="color:#a6e22e">nextElement</span><span style="color:#f92672">();</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">+</span>name<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+  	<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="2获取servlet名字的方法">2.获取Servlet名字的方法</h4>
+<p>​	1.getServletName:获得注册的Servlet的名字</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>ServletConfig config<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		String servletName <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getServletName</span><span style="color:#f92672">();</span>
+         System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>servletName<span style="color:#f92672">);</span>
+  	<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="3获取context的方法"><em>3.获取Context的方法</em></h4>
+<p>​	1.getServletContext:返回这个Servlet的ServletContext对象。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>ServletConfig config<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		ServletContext servletContext <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getServletContext</span><span style="color:#f92672">();</span>	
+  	<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="3servletcontext接口">3.ServletContext接口</h2>
+<p>1.可以由servletConfig获取
+2.对象代表当前WEB应用：可以认为ServletContext是当前WEB应用的一个大管家，可以从中获取到WEB应用的各个方面的信息</p>
+<h4 id="1获取当前web应用的初始化参数">1.获取当前WEB应用的初始化参数</h4>
+<p>1.在web.xml配置当前WEB应用的初始化参数<!-- raw HTML omitted --></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;servlet&gt;</span>
+    <span style="color:#f92672">&lt;servlet-name&gt;</span>helloServlet<span style="color:#f92672">&lt;/servlet-name&gt;</span>
+    <span style="color:#f92672">&lt;servlet-class&gt;</span>com.kingkiller.HelloServlet<span style="color:#f92672">&lt;/servlet-class&gt;</span>
+    <span style="color:#f92672">&lt;init-param&gt;</span>
+      <span style="color:#f92672">&lt;param-name&gt;</span>user<span style="color:#f92672">&lt;/param-name&gt;</span>
+      <span style="color:#f92672">&lt;param-value&gt;</span>root<span style="color:#f92672">&lt;/param-value&gt;</span>
+    <span style="color:#f92672">&lt;/init-param&gt;</span>
+    <span style="color:#f92672">&lt;init-param&gt;</span>
+      <span style="color:#f92672">&lt;param-name&gt;</span>password<span style="color:#f92672">&lt;/param-name&gt;</span>
+      <span style="color:#f92672">&lt;param-value&gt;</span>1234<span style="color:#f92672">&lt;/param-value&gt;</span>
+    <span style="color:#f92672">&lt;/init-param&gt;</span>
+    <span style="color:#f92672">&lt;load-on-startup&gt;</span>1<span style="color:#f92672">&lt;/load-on-startup&gt;</span>
+  <span style="color:#f92672">&lt;/servlet&gt;</span>
+</code></pre></div><p><em>注意放在load-on-startup前</em></p>
+<p>2.常用方法:</p>
+<p>​	getInitParameter(): Returns a <code>String</code> containing the value of the named context-wide  initialization parameter, or <code>null</code> 	if the parameter does not exist.</p>
+<p>​	getInitParameterNames(): Returns the names of the context&rsquo;s initialization parameters as an  <code>Enumeration</code> of <code>String</code> objects, or an empty  <code>Enumeration</code> if the context has no initialization parameters.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>ServletConfig config<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		ServletContext servletContext <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getServletContext</span><span style="color:#f92672">();</span>
+         String driver <span style="color:#f92672">=</span> servletContext<span style="color:#f92672">.</span><span style="color:#a6e22e">getInitParameter</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;driver&#34;</span><span style="color:#f92672">);</span>
+         System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;driver:&#34;</span><span style="color:#f92672">+</span>driver<span style="color:#f92672">);</span>
+         Enumeration<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> names2 <span style="color:#f92672">=</span> servletContext<span style="color:#f92672">.</span><span style="color:#a6e22e">getInitParameterNames</span><span style="color:#f92672">();</span>
+         <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>names2<span style="color:#f92672">.</span><span style="color:#a6e22e">hasMoreElements</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            String name <span style="color:#f92672">=</span> names2<span style="color:#f92672">.</span><span style="color:#a6e22e">nextElement</span><span style="color:#f92672">();</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34; --&gt;&#34;</span> <span style="color:#f92672">+</span> name<span style="color:#f92672">);</span>
+         <span style="color:#f92672">}</span>
+  	<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="2获取当前web应用的某一个文件在服务器上的绝对路径而不是部署前的路径">2.获取当前web应用的某一个文件在服务器上的绝对路径,而不是部署前的路径</h4>
+<p>1.getRealPath(String path): Returns a <code>String</code> containing the real path for a given virtual  path.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>ServletConfig config<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		ServletContext servletContext <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getServletContext</span><span style="color:#f92672">();</span>
+         String realPath <span style="color:#f92672">=</span> servletContext<span style="color:#f92672">.</span><span style="color:#a6e22e">getRealPath</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/note.txt&#34;</span><span style="color:#f92672">);</span>
+         System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>realPath<span style="color:#f92672">);</span>
+  	<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="3获取当前web应用的名称">3.获取当前WEB应用的名称</h4>
+<p>1.getContextPath(): Returns the context path of the web application.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>ServletConfig config<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		ServletContext servletContext <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getServletContext</span><span style="color:#f92672">();</span>
+         String contextPath <span style="color:#f92672">=</span> servletContext<span style="color:#f92672">.</span><span style="color:#a6e22e">getContextPath</span><span style="color:#f92672">();</span>
+         System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>contextPath<span style="color:#f92672">);</span>
+  	<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="4获取当前web应用的某一个文件对应的输入流">4.获取当前WEB应用的某一个文件对应的输入流</h4>
+<p>1.getResourceAsStream(String):Returns the resource located at the named path as an <code>InputStream</code>  object.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>ServletConfig config<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		ServletContext servletContext <span style="color:#f92672">=</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getServletContext</span><span style="color:#f92672">();</span>
+          <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            ClassLoader classLoader <span style="color:#f92672">=</span> getClass<span style="color:#f92672">().</span><span style="color:#a6e22e">getClassLoader</span><span style="color:#f92672">();</span>
+            InputStream is <span style="color:#f92672">=</span> classLoader<span style="color:#f92672">.</span><span style="color:#a6e22e">getResourceAsStream</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;jdbc.properties&#34;</span><span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;1.&#34;</span> <span style="color:#f92672">+</span> is<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// TODO: handle exception
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">try</span> <span style="color:#f92672">{</span>
+            InputStream is2 <span style="color:#f92672">=</span> servletContext<span style="color:#f92672">.</span><span style="color:#a6e22e">getResourceAsStream</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;/WEB-INF/classes/jdbc/properties&#34;</span><span style="color:#f92672">);</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;2.&#34;</span> <span style="color:#f92672">+</span> is2<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> <span style="color:#66d9ef">catch</span> <span style="color:#f92672">(</span>Exception e<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            <span style="color:#75715e">// TODO: handle exception
+</span><span style="color:#75715e"></span>        <span style="color:#f92672">}</span>
+  	<span style="color:#f92672">}</span>
+</code></pre></div><p><em>path的&rdquo;/&ldquo;为当前WEB应用的根目录</em></p>
+<h4 id="5和attribute相关的方法"><em>5.和attribute相关的方法</em></h4>
+<h2 id="4在servlet中获取请求信息">4.在Servlet中获取请求信息</h2>
+<p>​	Servlet的service()方法用于应答请求:因为每次请求都会调用service()方法
+​	ServletRequest:封装了请求信息.可以从中获取到任何的请求信息.
+​	ServletResponse:封装了响应信息,如果想给用户什么响应,具体可以使用该借口的方法实现
+​	这两个接口的实现类都是服务器给予实现的,并在服务器调用service方法时传入</p>
+<p>​	下面将会详细讲述ServletRequest和ServletResponse这两个接口</p>
+<p>创建login.html做测试</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+&lt;<span style="color:#f92672">html</span>&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+&lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>&gt;
+&lt;<span style="color:#f92672">title</span>&gt;Insert title here&lt;/<span style="color:#f92672">title</span>&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
+&lt;<span style="color:#f92672">body</span>&gt;
+
+	&lt;<span style="color:#f92672">form</span> <span style="color:#a6e22e">action</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;longinServlet&#34;</span> <span style="color:#a6e22e">method</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;post&#34;</span>&gt;
+		user:&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;user&#34;</span>/&gt;
+		password:&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;password&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;password&#34;</span>/&gt;
+		&lt;<span style="color:#f92672">br</span>&gt;&lt;<span style="color:#f92672">br</span>&gt;
+		interesting:
+		&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;checkbox&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;interesting&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;reading&#34;</span>/&gt;Reading
+		&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;checkbox&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;interesting&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;game&#34;</span>/&gt;Game
+		&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;checkbox&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;interesting&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;party&#34;</span>/&gt;Party
+		&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;checkbox&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;interesting&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;shopping&#34;</span>/&gt;Shopping
+		&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;checkbox&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;interesting&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;sport&#34;</span>/&gt;Sport
+		&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;checkbox&#34;</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;interesting&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;tv&#34;</span>/&gt;TV
+		&lt;<span style="color:#f92672">input</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;submit&#34;</span> <span style="color:#a6e22e">value</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;提交&#34;</span>/&gt;
+	&lt;/<span style="color:#f92672">form</span>&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div><h2 id="5servletrequest接口">5.ServletRequest接口</h2>
+<h4 id="1获取请求参数">1.获取请求参数</h4>
+<p>1.String getParameter(String name):以一个String返回指定的参数的值,如果这个参数不存在返回空值.但若接收的参数值为多个时,只能接收第一个的值</p>
+<p>2.Enumeration getParameterNames():返回所有的参数名的String对象列表,如果没有输入参数,则该返回一个空值</p>
+<p>3.String[] getParameterValues(String name):通过一个String对象的数组返回指定参数的值,如果这个参数不存在,该方法返回一个空值</p>
+<p>4.Map getParameterMap():返回请求参数的键值对,key:参数名,value:参数值.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest request<span style="color:#f92672">,</span> ServletResponse response<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;请求来了&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>request<span style="color:#f92672">);</span>
+        String user <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">getParameter</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;user&#34;</span><span style="color:#f92672">);</span>
+        String password <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">getParameter</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;password&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>user<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;:&#34;</span><span style="color:#f92672">+</span>password<span style="color:#f92672">);</span>
+        String interesting <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">getParameter</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;interesting&#34;</span><span style="color:#f92672">);</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>interesting<span style="color:#f92672">);</span>
+        String<span style="color:#f92672">[]</span> interestings <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">getParameterValues</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;interesting&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>String interest <span style="color:#f92672">:</span> interestings<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>interest<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        Enumeration<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> names <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">getParameterNames</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">while</span> <span style="color:#f92672">(</span>names<span style="color:#f92672">.</span><span style="color:#a6e22e">hasMoreElements</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            String name <span style="color:#f92672">=</span> names<span style="color:#f92672">.</span><span style="color:#a6e22e">nextElement</span><span style="color:#f92672">();</span>
+            String val <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">getParameter</span><span style="color:#f92672">(</span>name<span style="color:#f92672">);</span><span style="color:#75715e">//因为这里用的是getParameter所有在传入多个参数时只获取到第一个
+</span><span style="color:#75715e"></span>            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>name <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;:&#34;</span> <span style="color:#f92672">+</span> val<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        Map<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">[]&gt;</span> map <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">getParameterMap</span><span style="color:#f92672">();</span>
+        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Entry<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">,</span> String<span style="color:#f92672">[]&gt;</span>  entry <span style="color:#f92672">:</span> map<span style="color:#f92672">.</span><span style="color:#a6e22e">entrySet</span><span style="color:#f92672">())</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getKey</span><span style="color:#f92672">()</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;:&#34;</span> <span style="color:#f92672">+</span> Arrays<span style="color:#f92672">.</span><span style="color:#a6e22e">asList</span><span style="color:#f92672">(</span>entry<span style="color:#f92672">.</span><span style="color:#a6e22e">getValue</span><span style="color:#f92672">()));</span>
+        <span style="color:#f92672">}</span>
+     <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="2获取请求的url">2.获取请求的url</h4>
+<p>需要强转成其子类HttpServletRequest,再调用getRequestURI()方法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest request<span style="color:#f92672">,</span> ServletResponse response<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		HttpServletRequest httpServletRequest <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>HttpServletRequest<span style="color:#f92672">)</span> request<span style="color:#f92672">;</span>
+        String requestURI <span style="color:#f92672">=</span> httpServletRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">getRequestURI</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>requestURI<span style="color:#f92672">);</span>
+     <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="3获取请求方式">3.获取请求方式</h4>
+<p>1.getMethod:也是HttpServletRequest里的方法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest request<span style="color:#f92672">,</span> ServletResponse response<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		HttpServletRequest httpServletRequest <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>HttpServletRequest<span style="color:#f92672">)</span> request<span style="color:#f92672">;</span>
+        String method <span style="color:#f92672">=</span> httpServletRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">getMethod</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>method<span style="color:#f92672">);</span>
+     <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="4若是一个get请求获取请求参数对应的字符串">4.若是一个GET请求,获取请求参数对应的字符串</h4>
+<p>即url中?后的部分</p>
+<p>getQueryString()</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest request<span style="color:#f92672">,</span> ServletResponse response<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		HttpServletRequest httpServletRequest <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>HttpServletRequest<span style="color:#f92672">)</span> request<span style="color:#f92672">;</span>
+        String queryString <span style="color:#f92672">=</span> httpServletRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">getQueryString</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>queryString<span style="color:#f92672">);</span>
+     <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="5获取servlet的请求路径">5.获取Servlet的请求路径</h4>
+<p>即url-pattern</p>
+<p>getServletPath()</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest request<span style="color:#f92672">,</span> ServletResponse response<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>		HttpServletRequest httpServletRequest <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>HttpServletRequest<span style="color:#f92672">)</span> request<span style="color:#f92672">;</span>
+        String servletPath <span style="color:#f92672">=</span> httpServletRequest<span style="color:#f92672">.</span><span style="color:#a6e22e">getServletPath</span><span style="color:#f92672">();</span>
+        System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>servletPath<span style="color:#f92672">);</span>
+     <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="6和attribute相关的几个方法"><em>6.和attribute相关的几个方法</em></h4>
+<h2 id="6servletresponse接口">6.ServletResponse接口</h2>
+<h4 id="1getwriter">1.getWriter()</h4>
+<p>返回PrintWriter对象,调用该对象的print方法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest request<span style="color:#f92672">,</span> ServletResponse response<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        PrintWriter out <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span><span style="color:#a6e22e">getWriter</span><span style="color:#f92672">();</span>
+        out<span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;helloworld&#34;</span><span style="color:#f92672">);</span>
+     <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="2设置响应的内容类型">2.设置响应的内容类型:</h4>
+<p>responseContentType()</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"> <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest request<span style="color:#f92672">,</span> ServletResponse response<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        response<span style="color:#f92672">.</span><span style="color:#a6e22e">setContentType</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;application/msword&#34;</span><span style="color:#f92672">);</span><span style="color:#75715e">//设置响应类型为WORD文档,发送request请求后,会直接下载一个含有response内容的word文档
+</span><span style="color:#75715e"></span>        PrintWriter out <span style="color:#f92672">=</span> response<span style="color:#f92672">.</span><span style="color:#a6e22e">getWriter</span><span style="color:#f92672">();</span>
+        out<span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;helloworld&#34;</span><span style="color:#f92672">);</span>
+     <span style="color:#f92672">}</span>
+</code></pre></div><h4 id="3请求重定向">3.请求重定向</h4>
+<p>void sendRedirect(String location):此方法定义在HttpServletResponse中定义</p>
+<h2 id="7genericservlet">7.GenericServlet</h2>
+<p>1.是一个Servlet,是Servlet接口和ServletConfig接口的实现类.但是是一个抽象类,其中的service方法为抽象方法
+2.如果新建的Servlet程序直接继承GenericServlet会使开发更加的简洁
+3.具体实现:
+1.在GenericServlet里面,声明了一个ServletConfig类型的成员变量,
+在init(ServletConfig)方法中对其初始化
+2.利用了servletConfig成员变量的方法实现了ServletConfig接口的方法
+3.还定义了一个init()方法,在init(ServletConfig)方法中对其调用,子类可以直接重写init(),在其中实现对Servlet的初始化
+4.不建议直接覆盖init(Servlet),因为如果忘记编写super(ServletConfig),则会出现空指针异常
+5.新建的init()并非Servlet的生命周期方法,而init(ServletConfig)是生命周期方法</p>
+<p>下面我们自已创建一个MyGenericServlet(不包含两个日志方法)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.Enumeration<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.Servlet<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.ServletConfig<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.ServletContext<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.ServletException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.ServletRequest<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.ServletResponse<span style="color:#f92672">;</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyGenericServlet</span> <span style="color:#66d9ef">implements</span> Servlet<span style="color:#f92672">,</span>ServletConfig<span style="color:#f92672">{</span>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">     * 下面是实现Servlet的方法
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#66d9ef">private</span> ServletConfig config<span style="color:#f92672">;</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">destroy</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> ServletConfig <span style="color:#a6e22e">getServletConfig</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> config<span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">getServletInfo</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">;</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">(</span>ServletConfig config<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">config</span> <span style="color:#f92672">=</span> config<span style="color:#f92672">;</span>
+        init<span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">init</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">abstract</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest req<span style="color:#f92672">,</span> ServletResponse res<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException<span style="color:#f92672">;</span>
+    <span style="color:#75715e">/**
+</span><span style="color:#75715e">             * 下面是实现ServletConfig的方法
+</span><span style="color:#75715e">     */</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">getInitParameter</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getInitParameter</span><span style="color:#f92672">(</span>name<span style="color:#f92672">);</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> Enumeration<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">getInitParameterNames</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getInitParameterNames</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> ServletContext <span style="color:#a6e22e">getServletContext</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getServletContext</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">getServletName</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> config<span style="color:#f92672">.</span><span style="color:#a6e22e">getServletName</span><span style="color:#f92672">();</span>
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="8httpservlet">8.HttpServlet</h2>
+<p>​	1.是一个Servlet,继承自GenericServlet,针对HTTP协议定制
+​	2.在service()方法中直接把ServletRequest和ServetResponse转为HttpServletRequest和HttpServletResponse
+​	并调用了重载的service(HttpServletRequest,HttpServletResponse)方法
+​	在service(HttpServletRequest,HttpServletResponse)获取了侵权方式:request.getMethod()根据请求方式又创建			        doPost,doGet方法
+​	3.实际开发中,直接继承HttpServlet,并根据请求方式覆写doXxx()方法接口
+​	4.好处:直接由针对性的覆盖doXxx()方法;直接使用HttpServletRequest合HttpServletResponse,不再需要强转</p>
+<p>下面我们创建自己的MyHttpServlet进行测试</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">import</span> java.io.IOException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.ServletException<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.ServletRequest<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.ServletResponse<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.http.HttpServletRequest<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> javax.servlet.http.HttpServletResponse<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 针对HTTP协议定义的一个Servlet基类
+</span><span style="color:#75715e"> * @author Administrator
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyHttpServlet</span> <span style="color:#66d9ef">extends</span> MyGenericServlet <span style="color:#f92672">{</span>
+    <span style="color:#a6e22e">@Override</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>ServletRequest req<span style="color:#f92672">,</span> ServletResponse res<span style="color:#f92672">)</span>
+            <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>req <span style="color:#66d9ef">instanceof</span> HttpServletRequest<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            HttpServletRequest request <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>HttpServletRequest<span style="color:#f92672">)</span>req<span style="color:#f92672">;</span>
+            <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>res <span style="color:#66d9ef">instanceof</span> HttpServletResponse<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+                HttpServletResponse response <span style="color:#f92672">=</span> <span style="color:#f92672">(</span>HttpServletResponse<span style="color:#f92672">)</span> res<span style="color:#f92672">;</span>
+                service<span style="color:#f92672">(</span>request<span style="color:#f92672">,</span> response<span style="color:#f92672">);</span>
+            <span style="color:#f92672">}</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">service</span><span style="color:#f92672">(</span>HttpServletRequest request<span style="color:#f92672">,</span>HttpServletResponse response<span style="color:#f92672">)</span> <span style="color:#66d9ef">throws</span> ServletException<span style="color:#f92672">,</span> IOException <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//1.获取请求方式
+</span><span style="color:#75715e"></span>        String method <span style="color:#f92672">=</span> request<span style="color:#f92672">.</span><span style="color:#a6e22e">getMethod</span><span style="color:#f92672">();</span>
+        <span style="color:#75715e">//2.根据请求方式再调用对应的处理方法
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#e6db74">&#34;GET&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equalsIgnoreCase</span><span style="color:#f92672">(</span>method<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            doGet<span style="color:#f92672">(</span>request<span style="color:#f92672">,</span>response<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span><span style="color:#e6db74">&#34;POST&#34;</span><span style="color:#f92672">.</span><span style="color:#a6e22e">equalsIgnoreCase</span><span style="color:#f92672">(</span>method<span style="color:#f92672">))</span> <span style="color:#f92672">{</span>
+            doPost<span style="color:#f92672">(</span>request<span style="color:#f92672">,</span>response<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doPost</span><span style="color:#f92672">(</span>HttpServletRequest request<span style="color:#f92672">,</span>
+            HttpServletResponse response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">doGet</span><span style="color:#f92672">(</span>HttpServletRequest request<span style="color:#f92672">,</span>
+            HttpServletResponse response<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+        <span style="color:#75715e">// TODO Auto-generated method stub      
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+</code></pre></div></article>
+    </section>
+
+    <footer class="ui attached segment dream-tags" data-html2canvas-ignore>
+      
+        
+          <a class="ui label" href="/tags/java" title="java">java</a>
+        
+      
+      <div
+        class="ui label"
+        style="float: right; cursor: pointer;"
+        onclick="savePostAsImg()">
+        <i class="save icon"></i>Save as image
+      </div>
+    </footer>
+
+    
+
+    
+    
+    
+
+    
+
+  </div>
+  <aside class="sixteen wide mobile sixteen wide tablet four wide computer column dream-single-aside">
+    
+    
+      <div class="ui segment toc">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1servlet接口">1.Servlet接口</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#2servletconfig">2.ServletConfig</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#3servletcontext接口">3.ServletContext接口</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#4在servlet中获取请求信息">4.在Servlet中获取请求信息</a></li>
+    <li><a href="#5servletrequest接口">5.ServletRequest接口</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#6servletresponse接口">6.ServletResponse接口</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#7genericservlet">7.GenericServlet</a></li>
+    <li><a href="#8httpservlet">8.HttpServlet</a></li>
+  </ul>
+</nav>
+      </div>
+    
+
+    <article class="dream-header">
+  <section class="ui top attached center aligned segment">
+    <div class="ui small circular image">
+      
+        <img src="/img/avatar.jpg">
+      
+    </div>
+
+    
+    <h1 class="ui medium header">
+    
+      kingkiller&#39;s blog
+      <div class="sub header" style="margin-top: 0.5rem;"></div>
+    
+    </h1>
+    
+
+    <div class="ui horizontal list">
+      
+      <a class="item" href="/tags">
+        <i class="tags icon" title="All Tags"></i>
+      </a>
+      <a class="item" href="/categories">
+        <i class="th list icon" title="All Categories"></i>
+      </a>
+    </div>
+  </section>
+
+  
+  <section class="ui attached center aligned segment dream-tags">
+    
+      
+      
+      <a class="ui label" href="/tags/ai/" title="Ai">
+        Ai
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/java/" title="Java">
+        Java
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/review/" title="Review">
+        Review
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/spring/" title="Spring">
+        Spring
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/sql/" title="Sql">
+        Sql
+      </a>
+    
+  </section>
+  
+
+  
+  <section class="ui attached segment dream-categories">
+    <div class="ui accordion">
+      
+      
+      
+      
+      
+
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/code/" title="Code">
+              Code
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mvc/">spring mvc基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mybatis/">Mybatis基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mysql/">Mysql基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/liner/">机器学习(-):一元线性回归</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/string/">String字符串拼接比较</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/servlet/">Servlet总结</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstblog/">spring</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/film/" title="Film">
+              Film
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstflimreview/">2021春节档前瞻</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+
+      
+    </div>
+  </section>
+  
+
+  <section class="ui attached segment header-socials">
+    <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class=" mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class=" linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class=" github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+  </section>
+
+  <section class="ui bottom attached center aligned segment">
+    
+      <p>© 2021 kingkiller’s blog</p>
+    
+
+    <p>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> with theme <a href="https://github.com/g1eny0ung/hugo-theme-dream" target="_blank">Dream</a>.</p>
+
+    
+  </section>
+</article>
+
+  </aside>
+</div>
+
+          </div>
+        </section>
+        <section class="back">
+          <div class="dream-max-width">
+            <div class="ui centered relaxed grid dream-grid dream-back">
+  
+  
+  
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    <article>
+      <div class="ui top attached segment">
+        <h3 class="ui header">Social Links</h3>
+      </div>
+      <div class="ui bottom attached segment">
+        <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class="large mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class="large linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class="large github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+      </div>
+    </article>
+  </section>
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    
+  </section>
+
+  
+    
+  
+</div>
+
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+  window.defaultDark =  null 
+  window.backgroundDark =  null 
+  window.backgroundImageDark =  null 
+  window.darkNav =  true 
+  window.hasTwitterEmbed =  null 
+
+  if (window.hasTwitterEmbed) {
+    
+    window.twttr = (function (d, s, id) {
+      var js,
+        fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {}
+      if (d.getElementById(id)) return t
+      js = d.createElement(s)
+      js.id = id
+      js.src = 'https://platform.twitter.com/widgets.js'
+      fjs.parentNode.insertBefore(js, fjs)
+
+      t._e = []
+      t.ready = function (f) {
+        t._e.push(f)
+      }
+
+      return t
+    })(document, 'script', 'twitter-wjs')
+  }
+</script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/semantic.min.js"></script>
+<script src="/js/jquery.overlayScrollbars.min.js"></script>
+<script src="/js/header.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/theme.js"></script>
+
+    
+<script src="/js/html2canvas.min.js"></script>
+<script src="/js/post.js"></script>
+
+
+
+
+
+    
+      <div class="ui inverted segment" id="dream-search">
+  <div class="ui search">
+    <div class="ui transparent input">
+      <input class="prompt" type="text" placeholder="Search" />
+    </div>
+    <div class="results"></div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    $.getJSON('http:\/\/www.kingkiller.cn/index.json', function (data) {
+      $('.ui.search').search({
+        source: data,
+        searchFields: ['title'],
+        showNoResults: true,
+      })
+    })
+  })
+</script>
+<script src="/js/search.js"></script>
+
+    
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Mysql基础 | kingkiller’s blog</title>
+
+    
+
+
+
+<meta name="author" content="kingkiller" />
+<meta name="description" content="soz ceo" />
+
+
+
+<meta name="generator" content="Hugo 0.80.0" />
+
+<link rel="canonical" href="http://www.kingkiller.cn/post/mysql/" />
+
+
+<meta property="og:title" content="Mysql基础" />
+<meta property="og:description" content="mysql的基础和进阶命令，建议学习的时候跟着敲一遍哦" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://www.kingkiller.cn/post/mysql/" />
+<meta property="article:published_time" content="2021-01-29T18:43:40+08:00" />
+<meta property="article:modified_time" content="2021-01-29T18:43:40+08:00" />
+
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Mysql基础"/>
+<meta name="twitter:description" content="mysql的基础和进阶命令，建议学习的时候跟着敲一遍哦"/>
+
+
+<link rel="stylesheet" href="/css/semantic.min.css" />
+<link rel="stylesheet" href="/css/icomoon.css" />
+<link rel="stylesheet" href="/css/OverlayScrollbars.min.css" />
+<link rel="stylesheet" href="/css/github-markdown.css" />
+<link rel="stylesheet" href="/css/site.css" />
+
+<style>
+  a:hover {
+    text-decoration: underline;
+  }
+
+  
+  a {
+    color: seagreen !important;
+  }
+  
+
+  
+
+  
+  body.default {
+    
+
+    
+    background-image: url(/img/bg0.jpg);
+    
+  }
+  
+
+  
+</style>
+
+    
+
+
+
+
+
+
+    
+  </head>
+
+  <body class="default">
+    
+<nav class="ui secondary inverted menu dream-menu">
+
+  <div class="item">
+    <i class="large link bullseye icon dream-flip-toggle" title="Flip it!"></i>
+  </div>
+  <div class="item">
+    <i class="large link home icon" title="Home" onclick="window.location.href = 'http:\/\/www.kingkiller.cn'"></i>
+  </div>
+  <div class="item">
+    <i class="large link icon theme-switch" onclick="themeSwitch()"></i>
+  </div>
+  
+  <div class="item">
+    <i class="large link search icon" onclick="toggleSearch()"></i>
+  </div>
+  
+</nav>
+
+    <div class="flip-container">
+      <div class="flipper">
+        <section class="front">
+          <div class="dream-max-width">
+            
+<div class="ui centered relaxed grid dream-grid">
+  <div class="sixteen wide mobile sixteen wide tablet twelve wide computer column markdown-body dream-single" id="dream-save-post-as-img">
+    
+    <section class="ui top attached segment">
+      <header>
+        <h1 class="ui large header">
+          Mysql基础
+          <div class="sub header">
+            @
+            
+              
+                kingkiller
+              
+            
+
+            | 
+                Friday, Jan 29, 2021
+              
+
+            | 4 minutes read
+
+            | Update at
+              
+                Friday, Jan 29, 2021
+              
+          </div>
+        </h1>
+      </header>
+
+      <article class="main"><p>mysql的基础和进阶命令，建议学习的时候跟着敲一遍哦</p>
+<h1 id="mysql数据库">Mysql数据库</h1>
+<h2 id="11数据库概述">1.1数据库概述</h2>
+<h5 id="1什么是数据库">1.什么是数据库</h5>
+<p>​		数据库：英文为Database，简称DB</p>
+<p>​		数据库是按照数据结构来组织、存储和管理数据的仓库，简而言之，数据库就是存储数据的仓		库。</p>
+<p>​		数据库是一个专业存储和管理数据的软件系统，相比传统人工记录数据和直接使用文件保存数		据，	数据库具有更安全、更可靠、效率更高的优势。</p>
+<p>​		早期：层次式数据库，网络型数据库(已过时)</p>
+<p>​		现在：关系型数据库，非关系型数据库</p>
+<h5 id="2什么是关系型数据库">2.什么是关系型数据库</h5>
+<p>​		底层以二维表的形式保存数据的数据库，就是关系型数据库。如下：</p>
+<table>
+<thead>
+<tr>
+<th><em><strong>*编号*</strong></em></th>
+<th><em><strong>*姓名*</strong></em></th>
+<th><em><strong>*年龄*</strong></em></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em><strong>*1*</strong></em></td>
+<td><em><strong>*张三*</strong></em></td>
+<td><em><strong>*2*</strong></em><em><strong>*0*</strong></em></td>
+</tr>
+<tr>
+<td><em><strong>*2*</strong></em></td>
+<td><em><strong>*李四*</strong></em></td>
+<td><em><strong>*2*</strong></em><em><strong>*2*</strong></em></td>
+</tr>
+</tbody>
+</table>
+<p>​		常见的关系型数据库有：</p>
+<p>​		SQL Server：微软提供，适用于中型、大型项目，收费，在java中的使用占比不高，在.NET语		言中使用较多。</p>
+<p>​		Oracle：甲骨文公司提供，适用于大型、超大型项目，功能强大，性能优异，收费，在Java中		使	用占比很高。</p>
+<p>​		mysql：瑞典MySQLAB公司提供，适用于小型、中型项目，免费开源，小巧轻量，性能也不		差。在Java中使用占比较高。</p>
+<p>​		DB2：IBM公司提供，适用于大型项目，收费，在Java中使用占比不高。</p>
+<p>​		Sqlite：迷你，嵌入式设备，智能家居，手机，ipad等(Django2.0开始以sqlite3为默认数据库)</p>
+<p>​		什么是非关系型数据库</p>
+<p>​		非关系数据库的底层结构是以key-value，列等结构存储数据的常见非关系型数据库有：</p>
+<p>​		redis,mongodb</p>
+<h5 id="3数据库的相关概念">3.数据库的相关概念</h5>
+<p>​		1什么是数据库服务器</p>
+<p>​			服务器软件，mysql软件，将服务器软件装在电脑上，就就可以作为一台服务器对外提供服			务器（存取数据）</p>
+<p>​		2什么是数据库</p>
+<p>​			在每一个数据库的服务器中，可以有很多个仓库（数据库），通常情况下，一个网站的所有			数据会存放在一个数据库中。</p>
+<p>​		3.什么是表</p>
+<p>​			一个数据库中可以创建多张表，而一张表用于存放一类信息（Java中的类对应数据库中的			表）</p>
+<p>​		4什么是表记录</p>
+<p>​			一张表中可以包含多条记录，一个表记录用于存放某一条具体的信息。</p>
+<p>[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-NDdIi5bb-1577761642736)(C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20191215184000534.png)]</p>
+<h5 id="4什么是sql语言">4.什么是SQL语言</h5>
+<p>​		SQL：（Structured Query Language）结构化查询语言</p>
+<p>​		SQL是一种ANSI（美国国家标准化组织）的标准计算机语言，用于访问和操作数据库。</p>
+<p>​		SQL是用于操作关系型数据库的通用语言，即通过SQL语言可以操作所有的关系型数据库。</p>
+<p>​		SQL语言可以用于操作数据库（创建，删除，查看），操作数据表（创建，删除，查看，修		改），操作表记录（新增，更新，删除，查询）等。</p>
+<h2 id="12连接mysql服务器">1.2连接mysql服务器</h2>
+<p>​	通过命令行工具可以登录Mysql客户端，连接Mysql服务器，从而访问服务器中的数据</p>
+<h5 id="1连接mysql服务器">1.连接mysql服务器：</h5>
+<p>​		mysql -uroot -p</p>
+<p>​		-u:后面的root是用户名，这里使用的是超级管理员root</p>
+<p>​		-p:后面可以接密码</p>
+<h5 id="2连接mysql服务器并指定ip和端口">2.连接mysql服务器并指定IP和端口</h5>
+<p>​		mysql -uroot -proot -h127.0.0.1 -p3306</p>
+<p>​		-h：后面给出的127.0.0.1是服务器主机名或ip地址，可以省略的，默认连接本机；</p>
+<p>​		-P：(大写的P)后面的3306是连接端口，可以省略，默认连接3306端口；</p>
+<h5 id="3退出客户端命令quit或exit或q">3.退出客户端命令：quit或exit或\q</h5>
+<h5 id="4拓展内容">4.拓展内容</h5>
+<p>​		1.在cmd中连接mysql服务器之后，可以使用#，/**/，&ndash;等符号添加注释</p>
+<p>​		2.在cmd中连接mysql服务器之后，在书写SQL语句时，可以通过\c取消当前语句的执行</p>
+<h2 id="13数据库及表操作">1.3数据库及表操作</h2>
+<h5 id="1创建删除查看数据库">1创建，删除，查看数据库</h5>
+<p>​		提示：1.SQL语句对大小写不敏感。推荐关键字使用大写，自定义名称使用小写</p>
+<p>​					2.并且在自定义名称时，针对多个单词不要使用驼峰命名，而是使用下划线连接</p>
+<p>​		1.查看mysql服务器中所有的数据库</p>
+<p>​		语法：show  databases；</p>
+<p>​		2.进入某一数据库（进入数据库后，才能操作库中的表和表记录）</p>
+<p>​		语法：USE 库名；</p>
+<p>​		查看已进入的库</p>
+<p>​		SELECT DATABASE();</p>
+<p>​		3.查看当前数据库中所有的表</p>
+<p>​		select<code> </code>table_name from information_schema.tables  where table_schema=当前数据库;</p>
+<p>​		4删除mydb1库</p>
+<p>​		语法：DROP  DATABASE  库名 ;</p>
+<p>​		5.重新 创建mydb1库，指定编码为utf-8</p>
+<p>​		语法：CREATE  DATABASE  库名  CHARSET  编码；!!!utf-8在mysql中写出utf8</p>
+<p>​		6.查看建库时的语句</p>
+<p>​		语法：SHOW  CREATE  DATABASE  库名；</p>
+<h5 id="2创建删除查看表">2创建，删除，查看表</h5>
+<p>​		7.进入mydb1库，删除学生表（如果存在）</p>
+<p>​		语法：DROP TABLE 表名；</p>
+<p>​		8创建学生表（编号[数值类型]，姓名，性别，出生年月，考试成绩[浮点型]），建表的语法</p>
+<p>​		CREATE  TABLE  表名(</p>
+<p>​			列名  数据类型，</p>
+<p>​			列名  数据类型，</p>
+<p>​			&hellip;..</p>
+<p>​		) ;</p>
+<p>​		9.查看stu学生表结构</p>
+<p>​		语法：desc  表名</p>
+<h2 id="14新增更新删除表记录">1.4新增，更新，删除表记录</h2>
+<p>​	10.往学生表（stu）中插入记录（数据）</p>
+<p>​	语法：INSERT  INTO  表名(列名1，列名2，列名3，&hellip;)  VALUES(值1，值2，值3，&hellip;);</p>
+<p>​	提示：</p>
+<p>​		1.当为所有列插入值时，可以省写列名。但值的个数和顺序必须和声明式列的个数和顺序保持一致！</p>
+<p>​		2/SQL语句中的值为字符串或日期时，值的两边要加上单引号（有的版本的数据库双引号也可以，但推荐使用		单引号）</p>
+<p>​		3.在插入数据之前，先设置编码：set  names   gbk;  或者用以下命令连接mysql服务器</p>
+<p>​		mysql  &ndash;default-character-set=gbk  -uroot  -p</p>
+<p>​	11.查询stu表所有的学生信息</p>
+<p>​	语法：SELECT  * FROM 表名</p>
+<p>​	12.修改stu表所有的学生的成绩，加10分特长分</p>
+<p>​	语法：UPDATE  表名  SET  列=值，列=值，列=值，&hellip;[WHERE子句]</p>
+<p>​	13.修改stu表中编号为1的学生的成绩，将成绩改为83分</p>
+<p>​	UPDATE stu SET score=83 WHERE num=1;</p>
+<p>​	14.删除stu表中所有的记录</p>
+<p>​	语法：DELETE  FROM  表名 [where条件]</p>
+<h2 id="15查询表记录">1.5查询表记录</h2>
+<h5 id="1基础查询">1.基础查询</h5>
+<p>​		SELET语句用于从表中选取数据。结果被存储</p>
+<p>​		语法：SELECT  列名称  FROM 表名</p>
+<p>​		提示：</p>
+<p>​			1.*为通配符，表示查询所有</p>
+<p>​			2.但使用*有时会把不必要的列也查出来了，并且效率不如直接指定列名</p>
+<h5 id="2where子句查询">2.where子句查询</h5>
+<p>​		WHERE子句查询语法：SELECT  列名称  FROM  表名称  WHERE  列  运算符  值</p>
+<p>​		下面运算符可以在WHERE子句中使用</p>
+<p>​		[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-5Dt1MpoW-1577761642737)(C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\image-20191216134314517.png)]</p>
+<p>​		17.查询emp表中薪资大于3000的所有员工，显示员工姓名，薪资</p>
+<p>​		18.查询emp表中总薪资（薪资+奖金）大于3500的所有的员工，显示员工 的姓名，总薪资</p>
+<p>​		&ndash;ifnull(列，值)函数：判断指定的列是否包含null值，如果有null值，用第二个值替换null值</p>
+<p>​		&ndash;注意查看上面查询结果中的表头，如何将表头中的sal+bonus修改为“总薪资”</p>
+<p>​		19查询emp表中薪资在3000和4500之间的员工，显示员工姓名和薪资</p>
+<p>​		提示：between&hellip;and&hellip;在&hellip;之间</p>
+<p>​		20.查询emp表中薪资为1400,1600,1800的员工，显示员工姓名和薪资</p>
+<p>​		21.查询薪资不为1400，1600，1800的员工</p>
+<p>​		22.查询emp表中薪资大于4000和薪资小于2000的员工，显示员工姓名，薪资。</p>
+<p>​		23查询emp中薪资大于3000并且奖金小于600的员工，显示员工的姓名，薪资，奖金。</p>
+<p>​		24.查询没有部门的员工（即部门列为null值）</p>
+<h5 id="3模糊查询">3.模糊查询</h5>
+<p>​		LIKE操作符用于在WHERE子句中搜索列中的指定模式。</p>
+<p>​		可以和通配符（%、<!-- raw HTML omitted -->_）其中&quot;%&ldquo;表示0或多个任意的字符。下划线表示一个任意字符</p>
+<p>​		语法:SELECT  列  |  *  FROM  表名  WHERE  列名  LIKE  值</p>
+<p>​		小%表示以小开头，而后面可以是任意字符，同样，%小，表示以”小”结尾，而%小%则表示包含“小”这个字符		(并一同包含&rdquo;%小&quot;和&quot;小%&ldquo;这两种情况)</p>
+<p>​		25.查询emp表中姓名包含“涛”字的员工，显示员工姓名</p>
+<p>​		26.查询emp表中姓名以“刘”字开头的员工，显示员工姓名</p>
+<p>​		27.查询emp表中姓名以“刘”开头，并且姓名为两个字的员工，显示员工姓名</p>
+<h5 id="4多行函数查询">4.多行函数查询‘</h5>
+<p>​		多行函数也叫做聚合（聚集）函数，根据某一列或所有列进行统计。</p>
+<p>​		常见的多行函数有：</p>
+<p>​		COUNT(列名)：统计结果集中某一列或记录行的行数’  语法：SELECT COUNT(列名)  FROM 表名</p>
+<p>​		MAX(列)：统计结果集中某一列值中的最大值</p>
+<p>​		MIN(列)：统计结果集中某一列值中的最小值</p>
+<p>​		SUM(列)：统计结果集中某一列所有值的和</p>
+<p>​		AVG(列)：统计结果集中某一列值的平均值</p>
+<p>​			提示：多行函数不能用在where子句中</p>
+<h5 id="5分组查询">5.分组查询</h5>
+<p>​		GROUP  BY  语句根据一个或多个列对结果集进行分组</p>
+<p>​		在分组的列上我们可以使用COUNT，SUM,AVG,MAX,MIN等函数</p>
+<p>​		语法：SELECT  列  |  *  FROM  表名  [WHERE子句]  GROUP  BY  列</p>
+<h5 id="6排序查询">6.排序查询</h5>
+<p>​		使用ORDER  BY  子句将结果根据指定的列排序后再返回</p>
+<p>​		语法：SELECT  列名  FROM  表名  ORDER  BY  列名  ASC/DESC;</p>
+<p>​		ASC(默认)升序，即从低到高；DESC降序，即从高到低</p>
+<h5 id="7分页查询">7.分页查询</h5>
+<p>​		在mysql中，通过limit进行分页查询</p>
+<p>​		limit(页码-1)*每页显示的记录数，每页显示记录数</p>
+<h5 id="8其他函数">8.其他函数</h5>
+<p>​		curdate() 获取当前日期 年月日</p>
+<p>​		curtime() 获取当前时间 时分秒</p>
+<p>​		sysdate() 获取当前日期+时间 年月日 时分秒</p>
+<p>​		year(date) 返回date中的年份</p>
+<p>​		month(date) 返回date中的月份</p>
+<p>​		day(date) 返回date中的月份</p>
+<p>​		hour(date) 返回date中的小时</p>
+<p>​		minute(date) 返回date中的分钟</p>
+<p>​		second(date) 返回date中的秒</p>
+<p>​		CONCAT(s1,s2..) 将s1,s2 等多个字符串合并为一个字符串</p>
+<p>​		CONCAT_WS(x,s1,s2..) 同CONCAT(s1,s2,..) 函数，但是每个字符串之间要加上x，x是分隔符</p>
+<h2 id="16字符串类型">1.6字符串类型</h2>
+<h5 id="1数值类型">1.数值类型</h5>
+<p>​		MYSQL中支持多种整型，其中很大程度上是相同 的，只是存储值的大小范围不同而已。</p>
+<p>​		tinyint:占用1个字节，相对于java中的byte</p>
+<p>​		smallint:占用2个字节，相对于java中的short</p>
+<p>​		int:占用4个字节，相对于java中的int</p>
+<p>​		bigint:占用8个字节，相对于java中的long</p>
+<p>​		其次是浮点型类型即float 和 double类型</p>
+<p>​		float:4个字节单精浮点类型，相对于java中的float</p>
+<p>​		double:8个字节双精浮点型，相对于java中的long</p>
+<h5 id="2字符串类型">2.字符串类型</h5>
+<p>​		1.char(n) 定长字符串，最长255个字符。n表示字符数，例如：</p>
+<p>​		&ndash;创建user表，指定用户名为char类型，字符长度不超过10</p>
+<p>​		CREATE TABLE user(</p>
+<p>​			username char(10),</p>
+<p>​			&hellip;</p>
+<p>​		);</p>
+<p>​		2.varchar(n)变长字符串最长不超过65535个字节，n表示字符数，一般超过255个字节，会使用text类型，例		如：</p>
+<p>​		CREATE TABLE user(username varchar(10));</p>
+<p>​		所谓的不定长，是当插入的值长度小于指定的长度时，剩余的空间可以留给别的数据使用。</p>
+<p>​		3.大文本（长文本）类型</p>
+<p>​		最长65535个字节，一般超过255个字符列的会使用text</p>
+<p>​		CREATE TABLE user(resume text);</p>
+<p>​		text也分多种，其中bigtext存储数据的长度约为4GB</p>
+<p>​		拓展内容：（面试题）char(n)、varchar(n)、text都可以表示字符串类型，其区别在于：</p>
+<p>​		(1)char(n)在保存数据时, 如果存入的字符串长度小于指定的长度n，后面会用空格补全，因此可能会造成空间		浪费，但是char类型的存储速度较varchar和text快。</p>
+<p>​		因此char类型适合存储长度固定的数据，这样就不会有空间浪费，存储效率比后两者还快！</p>
+<p>​		(2)varchar(n)保存数据时, 按数据的真实长度存储, 剩余的空间可以留给别的数据用，因此varchar不会浪费空		间。因此varchar适合存储长度不固定的数据，这样不会有空间的浪费。</p>
+<p>​		(3)text是大文本类型，一般文本长度超过255个字符，就会使用text类型存储。</p>
+<p>​</p>
+<h5 id="3日期类型">3.日期类型</h5>
+<p>​		data:年月日</p>
+<p>​		time:时分秒</p>
+<p>​		datatime：年月日 时分秒</p>
+<p>​		timestamp:时间戳（实际存储的是一个时间毫秒值），与datetime存储日期格式相同</p>
+<p>​		两者的区别是：</p>
+<p>​		（1）timestamp最大表示2038年，而datatime范围是1000~9999</p>
+<p>​		（2）timestamp在插入术，修改数据时，可以自动更新成系统当前时间</p>
+<h2 id="17mysql的字段约束">1.7mysql的字段约束</h2>
+<h5 id="1主键约束">1.主键约束</h5>
+<p>​		主键约束：如果一个列添加了主键约束，那么这个列就是主键，主键的特点是唯一且不能为空</p>
+<p>​		添加主键约束，例如将id设置为主键：</p>
+<p>​		CREATE TABLE stu(id int primary key,&hellip;);</p>
+<h5 id="2非空约束">2.非空约束</h5>
+<p>​		非空约束：如果为了一个列添加了非空约束，那么这个列的值就不能为空，但可以重复。</p>
+<p>​		添加非空约束，例如为password添加非空约束：</p>
+<p>​			CREATE TABLE user(password varchar(50) not null,&hellip;);</p>
+<h5 id="3唯一约束">3.唯一约束</h5>
+<p>​		唯一约束：如果为了添加了唯一约束，那么这个列的值就必须是唯一的（即不能重复），但可以为空</p>
+<p>​		添加唯一约束，例如为username添加唯一约束及非空约束：</p>
+<p>​		CREATE TABLE user(username varchar(50) unique not null,&hellip;);</p>
+<h5 id="4外键约束">4.外键约束</h5>
+<p>​		外键其实就是用于调整数据库两种表数据之间对应关系的这样的一个列</p>
+<p>​		这样数据库就会帮助我们维护两张表数据之间的关系</p>
+<p>​		（1）创建表的同时添加外键</p>
+<p>​		CREATE TABLE emp(id int,name varchar(50),dept_id int,FOREIGN key(dept_id) REFERENCES stu(id));</p>
+<p>​		(2)如果在创建表时没有指定外键，那么后期该如何指定外键？以及如何删除外键？</p>
+<p>​		语法：ALTER TABLE emp ADD CONSTRAINT fk_id FOREIGN KEY(stu_id) REFERENCES stu(id)</p>
+<p>​		上面的fk_id为外键的名称，自定义</p>
+<h2 id="18表关系">1.8表关系</h2>
+<p>​	常见的表关系分为以下三种：</p>
+<p>​	一对多（多对一），一对一，多对多</p>
+<h2 id="19多表查询">1.9多表查询</h2>
+<p>​	&ndash;准备数据：建立db30库</p>
+<h5 id="1连接查询">1.连接查询</h5>
+<h5 id="2左外连接查询">2.左外连接查询</h5>
+<h5 id="3右外连接查询">3.右外连接查询</h5>
+<h5 id="4子查询">4.子查询</h5>
+<h5 id="5多表查询">5.多表查询</h5>
+<h2 id="110数据库备份与恢复">1.10数据库备份与恢复</h2>
+<h5 id="1备份数据库">1.备份数据库</h5>
+<p>​		在cmd窗口中（未登录的状态下），可以通过如下命令对指定的数据库进行备份：</p>
+<p>​		mysqldump -u 用户名 -p 数据库的名字  &gt; 备份文件的位置</p>
+<p>​		例如：对db40库中的数据（表，表记录）进行备份，备份到d:/db40.sql文件中</p>
+<p>​		mysqldump -uroot -p db40 &gt; d:db40,sql</p>
+<p>​		输入密码，如果没有任何提示，即表示备份成功</p>
+<h5 id="2回复数据库">2.回复数据库</h5>
+<p>​		在cmd窗口中（未登录的状态下），可以通过如下命令对指定的数据库进行恢复：</p>
+<p>​		mysql -u 用户名 -p 数据库的名字  &lt;  备份文件的位置</p>
+<p>​		例如：将d:/db40.sql文件中的数据恢复到db60库中</p>
+<p>​		&ndash;在cmd窗口中（已登录的状态下），先创建db60库，进入db60库：</p>
+<p>​		CREATE DATABASE db60 CHARSET utf8;</p>
+<p>​		use db60;</p>
+<p>​		&ndash;在cmd窗口中（未登录的状态下）</p>
+<p>​		mysql -uroot -p db60 &lt; d:/db40.sql</p>
+<p>​		或例如：将d:/db40.sql文件中的数据恢复到db80库中：</p>
+<p>​		CREATE DATABASE db80 CHARSET  utf8;</p>
+<p>​		use db80;</p>
+<p>​		&ndash;再通过source执行指定位置下的sql文件：</p>
+<p>sqldump -uroot -p db40 &gt; d:db40,sql</p>
+<p>​		输入密码，如果没有任何提示，即表示备份成功</p>
+<h5 id="2回复数据库-1">2.回复数据库</h5>
+<p>​		在cmd窗口中（未登录的状态下），可以通过如下命令对指定的数据库进行恢复：</p>
+<p>​		mysql -u 用户名 -p 数据库的名字  &lt;  备份文件的位置</p>
+<p>​		例如：将d:/db40.sql文件中的数据恢复到db60库中</p>
+<p>​		&ndash;在cmd窗口中（已登录的状态下），先创建db60库，进入db60库：</p>
+<p>​		CREATE DATABASE db60 CHARSET utf8;</p>
+<p>​		use db60;</p>
+<p>​		&ndash;在cmd窗口中（未登录的状态下）</p>
+<p>​		mysql -uroot -p db60 &lt; d:/db40.sql</p>
+<p>​		或例如：将d:/db40.sql文件中的数据恢复到db80库中：</p>
+<p>​		CREATE DATABASE db80 CHARSET  utf8;</p>
+<p>​		use db80;</p>
+<p>​		&ndash;再通过source执行指定位置下的sql文件：</p>
+<p>​		source d: /db40.sql</p></article>
+    </section>
+
+    <footer class="ui attached segment dream-tags" data-html2canvas-ignore>
+      
+        
+          <a class="ui label" href="/tags/sql" title="sql">sql</a>
+        
+      
+      <div
+        class="ui label"
+        style="float: right; cursor: pointer;"
+        onclick="savePostAsImg()">
+        <i class="save icon"></i>Save as image
+      </div>
+    </footer>
+
+    
+
+    
+    
+    
+
+    
+
+  </div>
+  <aside class="sixteen wide mobile sixteen wide tablet four wide computer column dream-single-aside">
+    
+    
+      <div class="ui segment toc">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#11数据库概述">1.1数据库概述</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#12连接mysql服务器">1.2连接mysql服务器</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#13数据库及表操作">1.3数据库及表操作</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#14新增更新删除表记录">1.4新增，更新，删除表记录</a></li>
+    <li><a href="#15查询表记录">1.5查询表记录</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#16字符串类型">1.6字符串类型</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#17mysql的字段约束">1.7mysql的字段约束</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#18表关系">1.8表关系</a></li>
+    <li><a href="#19多表查询">1.9多表查询</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#110数据库备份与恢复">1.10数据库备份与恢复</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+      </div>
+    
+
+    <article class="dream-header">
+  <section class="ui top attached center aligned segment">
+    <div class="ui small circular image">
+      
+        <img src="/img/avatar.jpg">
+      
+    </div>
+
+    
+    <h1 class="ui medium header">
+    
+      kingkiller&#39;s blog
+      <div class="sub header" style="margin-top: 0.5rem;"></div>
+    
+    </h1>
+    
+
+    <div class="ui horizontal list">
+      
+      <a class="item" href="/tags">
+        <i class="tags icon" title="All Tags"></i>
+      </a>
+      <a class="item" href="/categories">
+        <i class="th list icon" title="All Categories"></i>
+      </a>
+    </div>
+  </section>
+
+  
+  <section class="ui attached center aligned segment dream-tags">
+    
+      
+      
+      <a class="ui label" href="/tags/ai/" title="Ai">
+        Ai
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/java/" title="Java">
+        Java
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/review/" title="Review">
+        Review
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/spring/" title="Spring">
+        Spring
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/sql/" title="Sql">
+        Sql
+      </a>
+    
+  </section>
+  
+
+  
+  <section class="ui attached segment dream-categories">
+    <div class="ui accordion">
+      
+      
+      
+      
+      
+
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/code/" title="Code">
+              Code
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mvc/">spring mvc基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mybatis/">Mybatis基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mysql/">Mysql基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/liner/">机器学习(-):一元线性回归</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/string/">String字符串拼接比较</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/servlet/">Servlet总结</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstblog/">spring</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/film/" title="Film">
+              Film
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstflimreview/">2021春节档前瞻</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+
+      
+    </div>
+  </section>
+  
+
+  <section class="ui attached segment header-socials">
+    <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class=" mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class=" linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class=" github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+  </section>
+
+  <section class="ui bottom attached center aligned segment">
+    
+      <p>© 2021 kingkiller’s blog</p>
+    
+
+    <p>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> with theme <a href="https://github.com/g1eny0ung/hugo-theme-dream" target="_blank">Dream</a>.</p>
+
+    
+  </section>
+</article>
+
+  </aside>
+</div>
+
+          </div>
+        </section>
+        <section class="back">
+          <div class="dream-max-width">
+            <div class="ui centered relaxed grid dream-grid dream-back">
+  
+  
+  
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    <article>
+      <div class="ui top attached segment">
+        <h3 class="ui header">Social Links</h3>
+      </div>
+      <div class="ui bottom attached segment">
+        <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class="large mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class="large linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class="large github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+      </div>
+    </article>
+  </section>
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    
+  </section>
+
+  
+    
+  
+</div>
+
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+  window.defaultDark =  null 
+  window.backgroundDark =  null 
+  window.backgroundImageDark =  null 
+  window.darkNav =  true 
+  window.hasTwitterEmbed =  null 
+
+  if (window.hasTwitterEmbed) {
+    
+    window.twttr = (function (d, s, id) {
+      var js,
+        fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {}
+      if (d.getElementById(id)) return t
+      js = d.createElement(s)
+      js.id = id
+      js.src = 'https://platform.twitter.com/widgets.js'
+      fjs.parentNode.insertBefore(js, fjs)
+
+      t._e = []
+      t.ready = function (f) {
+        t._e.push(f)
+      }
+
+      return t
+    })(document, 'script', 'twitter-wjs')
+  }
+</script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/semantic.min.js"></script>
+<script src="/js/jquery.overlayScrollbars.min.js"></script>
+<script src="/js/header.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/theme.js"></script>
+
+    
+<script src="/js/html2canvas.min.js"></script>
+<script src="/js/post.js"></script>
+
+
+
+
+
+    
+      <div class="ui inverted segment" id="dream-search">
+  <div class="ui search">
+    <div class="ui transparent input">
+      <input class="prompt" type="text" placeholder="Search" />
+    </div>
+    <div class="results"></div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    $.getJSON('http:\/\/www.kingkiller.cn/index.json', function (data) {
+      $('.ui.search').search({
+        source: data,
+        searchFields: ['title'],
+        showNoResults: true,
+      })
+    })
+  })
+</script>
+<script src="/js/search.js"></script>
+
+    
+
+    
+
+    
+  </body>
+</html>

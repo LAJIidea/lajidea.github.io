@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Mybatis基础 | kingkiller’s blog</title>
+
+    
+
+
+
+<meta name="author" content="kingkiller" />
+<meta name="description" content="soz ceo" />
+
+
+
+<meta name="generator" content="Hugo 0.80.0" />
+
+<link rel="canonical" href="http://www.kingkiller.cn/post/mybatis/" />
+
+
+<meta property="og:title" content="Mybatis基础" />
+<meta property="og:description" content="mybatis的简介和基础学习" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://www.kingkiller.cn/post/mybatis/" />
+<meta property="article:published_time" content="2021-01-29T18:44:16+08:00" />
+<meta property="article:modified_time" content="2021-01-29T18:44:16+08:00" />
+
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Mybatis基础"/>
+<meta name="twitter:description" content="mybatis的简介和基础学习"/>
+
+
+<link rel="stylesheet" href="/css/semantic.min.css" />
+<link rel="stylesheet" href="/css/icomoon.css" />
+<link rel="stylesheet" href="/css/OverlayScrollbars.min.css" />
+<link rel="stylesheet" href="/css/github-markdown.css" />
+<link rel="stylesheet" href="/css/site.css" />
+
+<style>
+  a:hover {
+    text-decoration: underline;
+  }
+
+  
+  a {
+    color: seagreen !important;
+  }
+  
+
+  
+
+  
+  body.default {
+    
+
+    
+    background-image: url(/img/bg0.jpg);
+    
+  }
+  
+
+  
+</style>
+
+    
+
+
+
+
+
+
+    
+  </head>
+
+  <body class="default">
+    
+<nav class="ui secondary inverted menu dream-menu">
+
+  <div class="item">
+    <i class="large link bullseye icon dream-flip-toggle" title="Flip it!"></i>
+  </div>
+  <div class="item">
+    <i class="large link home icon" title="Home" onclick="window.location.href = 'http:\/\/www.kingkiller.cn'"></i>
+  </div>
+  <div class="item">
+    <i class="large link icon theme-switch" onclick="themeSwitch()"></i>
+  </div>
+  
+  <div class="item">
+    <i class="large link search icon" onclick="toggleSearch()"></i>
+  </div>
+  
+</nav>
+
+    <div class="flip-container">
+      <div class="flipper">
+        <section class="front">
+          <div class="dream-max-width">
+            
+<div class="ui centered relaxed grid dream-grid">
+  <div class="sixteen wide mobile sixteen wide tablet twelve wide computer column markdown-body dream-single" id="dream-save-post-as-img">
+    
+    <section class="ui top attached segment">
+      <header>
+        <h1 class="ui large header">
+          Mybatis基础
+          <div class="sub header">
+            @
+            
+              
+                kingkiller
+              
+            
+
+            | 
+                Friday, Jan 29, 2021
+              
+
+            | 4 minutes read
+
+            | Update at
+              
+                Friday, Jan 29, 2021
+              
+          </div>
+        </h1>
+      </header>
+
+      <article class="main"><p>mybatis的简介和基础学习</p>
+<h1 id="mybatis">Mybatis</h1>
+<h2 id="1事务以及四大特征">1.事务以及四大特征</h2>
+<h4 id="1什么是事务">1.什么是事务</h4>
+<p>​	数据库事务(Databases Transaction),是指作为单个逻辑工作单元执行的一系列操作.要么完全的执行,要么完全的不执行</p>
+<p>​	简单的说:事务就是将一堆的SQL语句(通常是增删改查)绑在一起,要么都执行成功,要么都执行失败</p>
+<p>​	以银行转账为例,张三转100块到李四的账号,这至少需要两条SQL语句:</p>
+<p>​	1.给张三的账户减去100</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql">update账户表 <span style="color:#66d9ef">set</span> money<span style="color:#f92672">=</span>money<span style="color:#f92672">-</span><span style="color:#ae81ff">100</span> <span style="color:#66d9ef">where</span> name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;张三
+</span></code></pre></div><p>​	2.给李四的账户加上100元</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-mysql" data-lang="mysql"><span style="color:#66d9ef">update</span> <span style="color:#960050;background-color:#1e0010">账户表</span> <span style="color:#66d9ef">set</span> money<span style="color:#f92672">=</span>money<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>oo <span style="color:#66d9ef">where</span> name<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;李四&#39;</span>
+</code></pre></div><p>​	如果在第一条SQL语句执行成功后,在执行第二条SQL语句之前,程序被中断了(可能是抛出了异常),那么李四的账户上没有加100,但张三账户上减去100,在现实中是不允许的</p>
+<h4 id="2事务的四大特性">2.事务的四大特性</h4>
+<p>​	事务的四大特性(ACID)是:</p>
+<p>​	1.原子性(Atomicity):事务中所有操作是不可再分割的原子单位.事务中所有操作要么全部执行成功,要么全部执行失败</p>
+<p>​	2.一致性(Consistency):事务执行后,数据库状态与其他业务规则保持一致.</p>
+<p>​	3.隔离性(Isolation):隔离性是指在并发操作中,不同的事务之间应该隔离开来,使每个并发中的事务不会相互干扰.</p>
+<p>​	4.持久性(Durability):一旦事务提交成功,事务中所有的数据操作都必须被持久化到数据库中</p>
+<h2 id="2mysql事务">2.Mysql事务</h2>
+<p>​	start transaction; &ndash; 手动开启事务</p>
+<p>​	rollback; &ndash; 回滚事务</p>
+<p>​	commit &ndash; 提交事务</p>
+<h4 id="1脏读dirty-read">1.脏读(dirty read)</h4>
+<p>读到另一个事务的未提交更新数据,即读到了脏数据;</p>
+<h4 id="2不可重复读unrepeatable-read">2.不可重复读(unrepeatable read)</h4>
+<p>对同一记录的两次读取不一致,因为另一事务对该记录做了修改(是针对修改操作)</p>
+<h4 id="3幻读虚读phantom-read">3.幻读(虚读)(phantom read)</h4>
+<p>对同一张表的两次查询不一致,因为另一事务插入了一条记录</p>
+<h2 id="3mybatis简介了解">3.MyBatis简介(了解)</h2>
+<h4 id="1什么是mybatis">1.什么是MyBatis</h4>
+<p>​	MyBatis 本是apache的一个开源项目iBatis, 2010年这个项目由apache software foundation 迁移到了google code，并且改名为MyBatis 。2013年11月迁移到Github。</p>
+<p>MyBatis是一个优秀的持久层框架，它对jdbc的操作数据库的过程进行封装，使开发者只需要关注 SQL 本身，而不需要花费精力去处理例如注册驱动、创建connection、创建statement、手动设置参数、结果集检索等jdbc繁杂的过程代码。</p>
+<p>Mybatis通过xml或注解的方式将要执行的各种statement（statement、preparedStatemnt）配置起来，并通过java对象和statement中的sql进行映射生成最终执行的sql语句，最后由mybatis框架执行sql并将结果映射成java对象并返回。</p>
+<p>总之，Mybatis对JDBC访问数据库的过程进行了封装，简化了JDBC代码，解决JDBC将结果集封装为Java对象的麻烦。</p>
+<p>下图是MyBatis架构图：
+<img src="https://img-blog.csdnimg.cn/20200116202254182.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE1MzA1OA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述">
+​</p>
+<p>(1)mybatis-config.xml是Mybatis的核心配置文件，通过其中的配置可以生成SqlSessionFactory,也就是SqlSession工厂</p>
+<p>(2)基于SqlSessionFactory可以生成SqlSession对象</p>
+<p>(3)SqlSession是一个既可以发送SQL去执行，并返回结果，类似于JDBC中的Connection对象，也是Mybatis中至关重要的一个对象。</p>
+<p>(4)Executor是SqlSession底层的对象，用于执行SQL语句</p>
+<p>(5)MapperStatement对象也是SqlSession底层的对象，用于接收输入映射（SQL语句中的参数），以及做输出映射（即将SQL查询的结果映射成相应的结果）</p>
+<h4 id="2为什么要使用mybatis">2.为什么要使用Mybatis</h4>
+<p>​	1.使用传统方式访问JDBC数据库</p>
+<p>​	(1)使用JDBC访问数据库有大量重复代码（比如注册驱动、获取连接、获取传输器、释放资源等）；</p>
+<p>​	(2)JDBC自身没有连接池，会频繁的创建连接和关闭连接，效率低；</p>
+<p>​	(3)SQL是写死在程序中，一旦修改SQL，需要对类重新编译；</p>
+<p>​	(4)对查询SQL执行后返回的ResultSet对象，需要手动处理，有时会特别麻烦；</p>
+<p>​	2.使用mybatis框架访问数据库:</p>
+<p>​	(1)Mybatis对JDBC对了封装，可以简化JDBC代码；</p>
+<p>​	(2)Mybatis自身支持连接池（也可以配置其他的连接池），因此可以提高程序的效率；</p>
+<p>​	(3)Mybatis是将SQL配置在mapper文件中，修改SQL只是修改配置文件，类不需要重新编译。</p>
+<p>​	(4)对查询SQL执行后返回的ResultSet对象，Mybatis会帮我们处理，转换成Java对象。</p>
+<p>总之，JDBC中所有的问题（代码繁琐、有太多重复代码、需要操作太多对象、释放资源、对结果的处理太麻烦等），在Mybatis框架中几乎都得到了解决！！</p>
+<p>Hibernate 和 Mybatis都是持久层(Mybatis需要写SQL语句,而Hibernate)</p>
+<h2 id="4mybatis快速入门">4.MyBatis快速入门</h2>
+<p>对mydatabase里的emp表进行测试</p>
+<p>表格式如下</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">create</span> <span style="color:#66d9ef">table</span> emp(
+	id int <span style="color:#66d9ef">primary</span> <span style="color:#66d9ef">key</span> auto_increment,
+	name varchar(<span style="color:#ae81ff">50</span>),
+	job varchar(<span style="color:#ae81ff">50</span>),
+	salary double
+);
+</code></pre></div><h4 id="1创建maven工程">1.创建maven工程</h4>
+<h4 id="2导入junitmysqlmybatis等开发包">2.导入junit,mysql,mybatis等开发包</h4>
+<p>在pom.xml文件中引入相关的依赖即可</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;dependencies&gt;</span>
+	<span style="color:#75715e">&lt;!-- junit单元测试 --&gt;</span>
+	<span style="color:#f92672">&lt;dependency&gt;</span>
+		<span style="color:#f92672">&lt;groupId&gt;</span>junit<span style="color:#f92672">&lt;/groupId&gt;</span>
+		<span style="color:#f92672">&lt;artifactId&gt;</span>junit<span style="color:#f92672">&lt;/artifactId&gt;</span>
+		<span style="color:#f92672">&lt;version&gt;</span>4.9<span style="color:#f92672">&lt;/version&gt;</span>
+	<span style="color:#f92672">&lt;/dependency&gt;</span>
+	<span style="color:#75715e">&lt;!-- mysql驱动 --&gt;</span>
+	<span style="color:#f92672">&lt;dependency&gt;</span>
+		<span style="color:#f92672">&lt;groupId&gt;</span>mysql<span style="color:#f92672">&lt;/groupId&gt;</span>
+		<span style="color:#f92672">&lt;artifactId&gt;</span>mysql-connector-java<span style="color:#f92672">&lt;/artifactId&gt;</span>
+		<span style="color:#f92672">&lt;version&gt;</span>5.1.32<span style="color:#f92672">&lt;/version&gt;</span>
+	<span style="color:#f92672">&lt;/dependency&gt;</span>
+	<span style="color:#75715e">&lt;!-- mybatis --&gt;</span>
+	<span style="color:#f92672">&lt;dependency&gt;</span>
+		<span style="color:#f92672">&lt;groupId&gt;</span>org.mybatis<span style="color:#f92672">&lt;/groupId&gt;</span>
+		<span style="color:#f92672">&lt;artifactId&gt;</span>mybatis<span style="color:#f92672">&lt;/artifactId&gt;</span>
+		<span style="color:#f92672">&lt;version&gt;</span>3.2.8<span style="color:#f92672">&lt;/version&gt;</span>
+	<span style="color:#f92672">&lt;/dependency&gt;</span>
+	<span style="color:#75715e">&lt;!-- 整合log4j --&gt;</span>
+	<span style="color:#f92672">&lt;dependency&gt;</span>
+		<span style="color:#f92672">&lt;groupId&gt;</span>org.slf4j<span style="color:#f92672">&lt;/groupId&gt;</span>
+		<span style="color:#f92672">&lt;artifactId&gt;</span>slf4j-log4j12<span style="color:#f92672">&lt;/artifactId&gt;</span>
+		<span style="color:#f92672">&lt;version&gt;</span>1.6.4<span style="color:#f92672">&lt;/version&gt;</span>
+	<span style="color:#f92672">&lt;/dependency&gt;</span>
+<span style="color:#f92672">&lt;/dependencies&gt;</span>
+</code></pre></div><p>可以自己去https://mvnrepository.com/里下载最新的maven依赖</p>
+<h4 id="3添加mybatis-configxml文件">3.添加mybatis-config.xml文件</h4>
+<p>1.在src/main/resource目录下,创建mybatis-config.xml文件(MyBatis的核心配置文件)</p>
+<p>2.mybatis-config.xml文件配置如下:</p>
+<p>​</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#75715e">&lt;!DOCTYPE configuration
+</span><span style="color:#75715e">    PUBLIC &#34;-//mybatis.org//DTD Config 3.0//EN&#34;
+</span><span style="color:#75715e">    &#34;http://mybatis.org/dtd/mybatis-3-config.dtd&#34;&gt;</span>
+    
+<span style="color:#75715e">&lt;!-- MyBatis的全局配置文件 --&gt;</span>
+<span style="color:#f92672">&lt;configuration</span> <span style="color:#f92672">&gt;</span>
+	<span style="color:#75715e">&lt;!-- 1.配置开发环境（需设置一个默认的环境） --&gt;</span>
+	<span style="color:#f92672">&lt;environments</span> <span style="color:#a6e22e">default=</span><span style="color:#e6db74">&#34;develop&#34;</span><span style="color:#f92672">&gt;</span>
+		<span style="color:#75715e">&lt;!-- 这里可以配置多个环境，比如develop，test等 --&gt;</span>
+		<span style="color:#f92672">&lt;environment</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;develop&#34;</span><span style="color:#f92672">&gt;</span>
+			<span style="color:#75715e">&lt;!-- 1.1.配置事务管理方式：JDBC/MANAGED
+</span><span style="color:#75715e">			JDBC：将事务交给JDBC管理（推荐）
+</span><span style="color:#75715e">			MANAGED：自己管理事务
+</span><span style="color:#75715e">			  --&gt;</span>
+			<span style="color:#f92672">&lt;transactionManager</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;JDBC&#34;</span><span style="color:#f92672">&gt;&lt;/transactionManager&gt;</span>
+			
+			<span style="color:#75715e">&lt;!-- 1.2.配置数据源，即连接池方式:JNDI/POOLED/UNPOOLED
+</span><span style="color:#75715e">				JNDI：已过时
+</span><span style="color:#75715e">				POOLED：使用连接池（推荐）
+</span><span style="color:#75715e">				UNPOOLED：不使用连接池
+</span><span style="color:#75715e">			 --&gt;</span>
+			<span style="color:#f92672">&lt;dataSource</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;POOLED&#34;</span><span style="color:#f92672">&gt;</span>
+				<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;driver&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;com.mysql.jdbc.Driver&#34;</span><span style="color:#f92672">/&gt;</span><span style="color:#75715e">&lt;!-- jdbc驱动 --&gt;</span>
+				<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;url&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;jdbc:mysql://localhost:3306/yourdatabase?characterEncoding=utf-8&#34;</span><span style="color:#f92672">/&gt;</span>  <span style="color:#75715e">&lt;!-- 连接本地的数据库并设定编码格式为utf-8 --&gt;</span>
+				<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;username&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;root&#34;</span><span style="color:#f92672">/&gt;</span><span style="color:#75715e">&lt;!-- 用户名 --&gt;</span>
+				<span style="color:#f92672">&lt;property</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;password&#34;</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;root&#34;</span><span style="color:#f92672">/&gt;</span><span style="color:#75715e">&lt;!-- 密码 --&gt;</span>
+			<span style="color:#f92672">&lt;/dataSource&gt;</span>
+		<span style="color:#f92672">&lt;/environment&gt;</span>
+	<span style="color:#f92672">&lt;/environments&gt;</span>
+	
+	<span style="color:#75715e">&lt;!-- 2.加载Mapper配置文件(因mapper文件中配置了要执行的SQL语句) --&gt;</span>
+	<span style="color:#f92672">&lt;mappers&gt;</span>
+		<span style="color:#75715e">&lt;!-- 注意路径 --&gt;</span>
+		<span style="color:#f92672">&lt;mapper</span> <span style="color:#a6e22e">resource=</span><span style="color:#e6db74">&#34;XxxMapper.xml&#34;</span><span style="color:#f92672">/&gt;</span> <span style="color:#75715e">&lt;!-- XxxMap为你自己的实体类所对应的mapper.xml文件 --&gt;</span>
+	<span style="color:#f92672">&lt;/mappers&gt;</span>
+<span style="color:#f92672">&lt;/configuration&gt;</span>
+</code></pre></div><p>configuration是根标签，当前文件中所有的配置都在该标签内，注意其中配置的关键点:</p>
+<p>默认的环境 ID（比如:default=&quot;<strong>develop</strong>&quot;）。</p>
+<p>每个 environment 元素定义的环境 ID（比如:id=&quot;<strong>develop</strong>&quot;）。</p>
+<p>事务管理器的配置（比如:type=&quot;<strong>JDBC</strong>&quot;）。</p>
+<p>数据源的配置（比如:type=&quot;<strong>POOLED</strong>&quot;）。</p>
+<p>1.encironments标签:该标签内部可以配置多个environment，即多种环境，每种环境可以做不同配置或连接不同数据库。例如，开发、测试、生产环境可能需要不同的配置，连接的数据库可能也不相同，因此我们可以配置三个environment，分别对应上面三种不同的环境。</p>
+<p>但是要记住，environment可以配置多个，但是最终要使用的只能是其中一个！</p>
+<p>2.environment标签内部可以配置多种配置信息，下面介绍事务管理配置和数据源配置。</p>
+<p>3.transactionManage事务管理配置，mybatis中有两种事务管理方式，也就是 type=&quot;[JDBC|MANAGED]。</p>
+<p>​	JDBC：这个配置就是直接使用了 JDBC 的提交和回滚设置，它依赖于从数据源得到的连接来管理事务范围。推荐使用。</p>
+<p>​	MANAGED：这个配置几乎没做什么。它从来不提交或回滚一个连接。需要自己手动添加并管理。不推荐使用。</p>
+<p>4.dataSource标签:数据源，也就是连接池配置。这里type指定数据源类型，有三种内建的类型：JNDI、POOLED、UNPOOLED</p>
+<p>​	JNDI:已过时，不推荐使用！</p>
+<p>​	POOLED:使用连接池，mybatis会创建连接池，并从连接池中获取连接访问数据库，在操作完成后，将会把连接返回连接池。</p>
+<p>​	UNPOOLED不使用连接池，该方式适用于只有小规模数量并发用户的简单应用程序上。</p>
+<p>5.mappers标签:用于导入mapper文件的位置，其中可以配置多个mapper，即可以导入多个mapper文件。</p>
+<h4 id="4添加并编写实体类">4.添加并编写实体类</h4>
+<p>这里我们以员工类Emp为例</p>
+<p>在src/main/java目录下创建pojo包,并创建Emp类</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.king.pojo<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * 实体类,用于封装Emp表中的一条用户信息
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Emp</span> <span style="color:#f92672">{</span>
+	<span style="color:#75715e">//1.声明实体类中的属性
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">private</span> Integer id<span style="color:#f92672">;</span>
+	<span style="color:#66d9ef">private</span> String name<span style="color:#f92672">;</span>
+	<span style="color:#66d9ef">private</span> String job<span style="color:#f92672">;</span>
+	<span style="color:#66d9ef">private</span> Double salary<span style="color:#f92672">;</span>
+	
+	<span style="color:#75715e">//2.提供对应的getter和setter方法
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">public</span> Integer <span style="color:#a6e22e">getId</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> id<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setId</span><span style="color:#f92672">(</span>Integer id<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> id<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">getName</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> name<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setName</span><span style="color:#f92672">(</span>String name<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">name</span> <span style="color:#f92672">=</span> name<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">getJob</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> job<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setJob</span><span style="color:#f92672">(</span>String job<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">job</span> <span style="color:#f92672">=</span> job<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+	<span style="color:#66d9ef">public</span> Double <span style="color:#a6e22e">getSalary</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> salary<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+	<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setSalary</span><span style="color:#f92672">(</span>Double salary<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">this</span><span style="color:#f92672">.</span><span style="color:#a6e22e">salary</span> <span style="color:#f92672">=</span> salary<span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+	
+	<span style="color:#75715e">//3.重写toString方法
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">@Override</span>
+	<span style="color:#66d9ef">public</span> String <span style="color:#a6e22e">toString</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+		<span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Emp [id=&#34;</span> <span style="color:#f92672">+</span> id <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, name=&#34;</span> <span style="color:#f92672">+</span> name <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, job=&#34;</span> <span style="color:#f92672">+</span> job <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, salary=&#34;</span> <span style="color:#f92672">+</span> salary <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;]&#34;</span><span style="color:#f92672">;</span>
+	<span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="5添加empmapperxml文件">5.添加EmpMapper.xml文件</h4>
+<p>1.在src/main/resource目录下,创建EmpMapper.xml文件(实体类的映射文件)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#75715e">&lt;!DOCTYPE mapper
+</span><span style="color:#75715e">	PUBLIC &#34;-//mybatis.org//DTD Mapper 3.0//EN&#34;
+</span><span style="color:#75715e">	&#34;http://mybatis.org/dtd/mybatis-3-mapper.dtd&#34;&gt;</span>
+
+<span style="color:#75715e">&lt;!-- 
+</span><span style="color:#75715e">	namespace一般指定为当前文件的所在包路径+文件名
+</span><span style="color:#75715e">	将来在程序中通过[ namespace + id ]定位到执行哪一条SQL语句
+</span><span style="color:#75715e"> --&gt;</span>
+<span style="color:#f92672">&lt;mapper</span> <span style="color:#a6e22e">namespace=</span><span style="color:#e6db74">&#34;EmpMapper&#34;</span><span style="color:#f92672">&gt;</span>
+	<span style="color:#75715e">&lt;!-- 通过select、insert、update、delete标签声明要执行的SQL --&gt;</span>
+	<span style="color:#75715e">&lt;!-- 练习1: 查询emp表中的所有员工信息
+</span><span style="color:#75715e">		resultType指定查询的结果将会封装到什么类型中 --&gt;</span>
+	<span style="color:#f92672">&lt;select</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;findAll&#34;</span> <span style="color:#a6e22e">resultType=</span><span style="color:#e6db74">&#34;com.king.pojo.Emp&#34;</span><span style="color:#f92672">&gt;</span>
+		select * from emp
+	<span style="color:#f92672">&lt;/select&gt;</span>
+	<span style="color:#75715e">&lt;!-- 
+</span><span style="color:#75715e">	resultType：返回值类型，简单类型（例如：Integer，String，Emp等）
+</span><span style="color:#75715e">		如果返回集合(List&lt;Emp&gt;)，只需配置集合中的元素类型即可！
+</span><span style="color:#75715e">	--&gt;</span>
+<span style="color:#f92672">&lt;/mapper&gt;</span>
+</code></pre></div><p>1.第1行是xml的文档声明，用于声明xml的版本和编码</p>
+<p>2.第2、3、4行，引入了xml约束文档，当前xml文档将会按照mybatis-3-mapper.dtd文件所要求的规则进行书写。</p>
+<p>3.Mapper标签:根标签，其中namespace(名称空间，也叫命名空间)，要求不能重复。其实就是一个名称，一般我们指定为&quot;包名+文件名&quot;。</p>
+<p>4.select标签:用于指定将来要执行的各种SQL语句。标签上可以声明属性，下面介绍常用的属性：id、resultType、resultMap</p>
+<p>​	id属性：要求值不能重复。将来在执行SQL时，可以通过namespace + id找到指定SQL并执行。</p>
+<p>​	resultType属性：从这条SQL语句中返回所期望类型的类的完全限定名称（包名+类名）。注意如果是集合情形，那应该是集合可以包含的类型，而不能是集合本身。</p>
+<p>​	简而言之，resultType控制查询SQL执行后返回值的类型或集合中的泛型，例如查询emp表中的单条记录，返回值是一个Emp对象，因此，resultType=&ldquo;com.tedu.pojo.Emp&rdquo;；</p>
+<p>​	如果查询emp表中的多条记录，返回值是一个List<!-- raw HTML omitted -->，此时resultType的值应该集合中的泛型，因此resultType=&ldquo;com.tedu.pojo.Emp&rdquo;；</p>
+<p>​	resultMap属性：复杂对象结构（例如多表关联查询等）。 使用 resultType 或 resultMap，但不能同时使用。</p>
+<h4 id="6建立测试类测试">6.建立测试类测试</h4>
+<p>在src/main/java目录下建立testMybatis包,建立TestMybatis类</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#f92672">package</span> com.king.testMybatis<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.io.InputStream<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> java.util.List<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.ibatis.io.Resources<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.ibatis.session.SqlSession<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.ibatis.session.SqlSessionFactory<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.apache.ibatis.session.SqlSessionFactoryBuilder<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> org.junit.Test<span style="color:#f92672">;</span>
+<span style="color:#f92672">import</span> com.king.pojo.Emp<span style="color:#f92672">;</span>
+<span style="color:#75715e">/**
+</span><span style="color:#75715e"> * Mybatis的快速入门案例
+</span><span style="color:#75715e"> * 查询emp表中的所有的员工信息,将员工信息封装到list集合中返回
+</span><span style="color:#75715e"> * @author Administrator
+</span><span style="color:#75715e"> *
+</span><span style="color:#75715e"> */</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TestMybatis</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">//练习1:查询所有员工的信息
+</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">@Test</span>
+    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testFindAll</span><span style="color:#f92672">()</span> <span style="color:#66d9ef">throws</span> Exception <span style="color:#f92672">{</span>
+        <span style="color:#75715e">//1.读取mybatis核心配置文件(mybatis-config.xml)
+</span><span style="color:#75715e"></span>        InputStream in <span style="color:#f92672">=</span> Resources<span style="color:#f92672">.</span><span style="color:#a6e22e">getResourceAsStream</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;mybatis-config.xml&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">//2.获取SqlSessionFactory工厂对象
+</span><span style="color:#75715e"></span>        SqlSessionFactory factory <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> SqlSessionFactoryBuilder<span style="color:#f92672">().</span><span style="color:#a6e22e">build</span><span style="color:#f92672">(</span>in<span style="color:#f92672">);</span>
+        <span style="color:#75715e">//3.读取SqlSession对象(打开了域数据库的连接)
+</span><span style="color:#75715e"></span>        SqlSession session <span style="color:#f92672">=</span> factory<span style="color:#f92672">.</span><span style="color:#a6e22e">openSession</span><span style="color:#f92672">();</span> 
+        <span style="color:#75715e">//4.执行mapper文件中的sql语句,返回处理结果
+</span><span style="color:#75715e"></span>        List<span style="color:#f92672">&lt;</span>Emp<span style="color:#f92672">&gt;</span> list <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span><span style="color:#a6e22e">selectList</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;EmpMapper.findAll&#34;</span><span style="color:#f92672">);</span>
+        <span style="color:#75715e">//5.输出结果
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">for</span> <span style="color:#f92672">(</span>Emp emp <span style="color:#f92672">:</span> list<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+            System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span>emp<span style="color:#f92672">);</span>
+        <span style="color:#f92672">}</span> 
+    <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="5mybatis增删改查">5.MyBatis增删改查</h2>
+<h4 id="1新增员工">1.新增员工</h4>
+<p>1.编辑EmpMapper.xml文件,添加新增</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-XML" data-lang="XML"><span style="color:#75715e">&lt;!-- 注意:除了查询的标签外,其他标签不用指定resultType,因为返回值都是int类型 --&gt;</span>
+<span style="color:#f92672">&lt;update</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;insert&#34;</span> <span style="color:#f92672">&gt;</span>
+	insert into emp value(null, &#39;king&#39;, &#39;singer&#39;, 888)
+<span style="color:#f92672">&lt;/update&gt;</span>
+</code></pre></div><p>2.编写TestMybatis类,添加testInsert方法,实现增加员工的操作</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Test</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testInsert</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span> 
+	<span style="color:#75715e">//执行sql语句, 返回执行结果
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">int</span> rows <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span><span style="color:#a6e22e">update</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;EmpMapper.insert&#34;</span><span style="color:#f92672">);</span>
+	<span style="color:#75715e">//提交事务
+</span><span style="color:#75715e"></span>	session<span style="color:#f92672">.</span><span style="color:#a6e22e">commit</span><span style="color:#f92672">();</span>
+	System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;影响的行数: &#34;</span><span style="color:#f92672">+</span>rows<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="2修改员工">2.修改员工</h4>
+<p>1.编辑EmpMapper.xml文件,添加新员工对应的sql</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;update</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;update&#34;</span><span style="color:#f92672">&gt;</span>
+	update emp set job=&#39;歌手<span style="color:#960050;background-color:#1e0010">&amp;</span>演员&#39;, salary=8888 where name=&#39;king&#39;
+<span style="color:#f92672">&lt;/update&gt;</span>
+</code></pre></div><p>2.编写TestMybatis类,添加testUpdate方法,实现修改员工的信息</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Test</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testUpdate</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span> <span style="color:#f92672">}</span>
+	<span style="color:#75715e">//执行sql语句, 返回执行结果
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">int</span> rows <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span><span style="color:#a6e22e">update</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;EmpMapper.update&#34;</span><span style="color:#f92672">);</span>
+	<span style="color:#75715e">//提交事务
+</span><span style="color:#75715e"></span>	session<span style="color:#f92672">.</span><span style="color:#a6e22e">commit</span><span style="color:#f92672">();</span>
+	System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;影响行数:&#34;</span><span style="color:#f92672">+</span>rows<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="3删除员工">3.删除员工</h4>
+<p>1.编辑EmpMapper.xml文件,添加新增员工对应的sql</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;update</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;delete&#34;</span><span style="color:#f92672">&gt;</span>
+	delete from emp where name=&#39;king&#39;
+<span style="color:#f92672">&lt;/update&gt;</span>
+</code></pre></div><p>2.编写TestMybatis类,添加testDelete方法,实现删除员工</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Test</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testDelete</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+	<span style="color:#75715e">//执行sql语句, 返回执行结果
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">int</span> rows <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span><span style="color:#a6e22e">update</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;EmpMapper.delete&#34;</span><span style="color:#f92672">);</span>
+	<span style="color:#75715e">//提交事务
+</span><span style="color:#75715e"></span>	session<span style="color:#f92672">.</span><span style="color:#a6e22e">commit</span><span style="color:#f92672">();</span>
+	System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;影响行数:&#34;</span><span style="color:#f92672">+</span>rows<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="4--占位符">4. #{ }占位符</h4>
+<p>在上面的增删改查操作中，SQL语句中的值是写死在SQL中，而在实际开发中，此处的值往往是用户提交过来的值，因此这里我们需要将SQL中写死的值替换为占位符。</p>
+<p>除员工</p>
+<p>1.编辑EmpMapper.xml文件,添加新增员工对应的sql</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#f92672">&lt;update</span> <span style="color:#a6e22e">id=</span><span style="color:#e6db74">&#34;delete&#34;</span><span style="color:#f92672">&gt;</span>
+	delete from emp where name=&#39;king&#39;
+<span style="color:#f92672">&lt;/update&gt;</span>
+</code></pre></div><p>2.编写TestMybatis类,添加testDelete方法,实现删除员工</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#a6e22e">@Test</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">testDelete</span><span style="color:#f92672">()</span> <span style="color:#f92672">{</span>
+	<span style="color:#75715e">//执行sql语句, 返回执行结果
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">int</span> rows <span style="color:#f92672">=</span> session<span style="color:#f92672">.</span><span style="color:#a6e22e">update</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;EmpMapper.delete&#34;</span><span style="color:#f92672">);</span>
+	<span style="color:#75715e">//提交事务
+</span><span style="color:#75715e"></span>	session<span style="color:#f92672">.</span><span style="color:#a6e22e">commit</span><span style="color:#f92672">();</span>
+	System<span style="color:#f92672">.</span><span style="color:#a6e22e">out</span><span style="color:#f92672">.</span><span style="color:#a6e22e">println</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;影响行数:&#34;</span><span style="color:#f92672">+</span>rows<span style="color:#f92672">);</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h4 id="4--占位符-1">4. #{ }占位符</h4>
+<p>在上面的增删改查操作中，SQL语句中的值是写死在SQL中，而在实际开发中，此处的值往往是用户提交过来的值，因此这里我们需要将SQL中写死的值替换为占位符。</p>
+<p>使用占位符完成上面的增删改查练习</p></article>
+    </section>
+
+    <footer class="ui attached segment dream-tags" data-html2canvas-ignore>
+      
+        
+          <a class="ui label" href="/tags/java" title="java">java</a>
+        
+          <a class="ui label" href="/tags/sql" title="sql">sql</a>
+        
+      
+      <div
+        class="ui label"
+        style="float: right; cursor: pointer;"
+        onclick="savePostAsImg()">
+        <i class="save icon"></i>Save as image
+      </div>
+    </footer>
+
+    
+
+    
+    
+    
+
+    
+
+  </div>
+  <aside class="sixteen wide mobile sixteen wide tablet four wide computer column dream-single-aside">
+    
+    
+      <div class="ui segment toc">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1事务以及四大特征">1.事务以及四大特征</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#2mysql事务">2.Mysql事务</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#3mybatis简介了解">3.MyBatis简介(了解)</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#4mybatis快速入门">4.MyBatis快速入门</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+    <li><a href="#5mybatis增删改查">5.MyBatis增删改查</a>
+      <ul>
+        <li></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+      </div>
+    
+
+    <article class="dream-header">
+  <section class="ui top attached center aligned segment">
+    <div class="ui small circular image">
+      
+        <img src="/img/avatar.jpg">
+      
+    </div>
+
+    
+    <h1 class="ui medium header">
+    
+      kingkiller&#39;s blog
+      <div class="sub header" style="margin-top: 0.5rem;"></div>
+    
+    </h1>
+    
+
+    <div class="ui horizontal list">
+      
+      <a class="item" href="/tags">
+        <i class="tags icon" title="All Tags"></i>
+      </a>
+      <a class="item" href="/categories">
+        <i class="th list icon" title="All Categories"></i>
+      </a>
+    </div>
+  </section>
+
+  
+  <section class="ui attached center aligned segment dream-tags">
+    
+      
+      
+      <a class="ui label" href="/tags/ai/" title="Ai">
+        Ai
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/java/" title="Java">
+        Java
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/review/" title="Review">
+        Review
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/spring/" title="Spring">
+        Spring
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/sql/" title="Sql">
+        Sql
+      </a>
+    
+  </section>
+  
+
+  
+  <section class="ui attached segment dream-categories">
+    <div class="ui accordion">
+      
+      
+      
+      
+      
+
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/code/" title="Code">
+              Code
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mvc/">spring mvc基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mybatis/">Mybatis基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mysql/">Mysql基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/liner/">机器学习(-):一元线性回归</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/string/">String字符串拼接比较</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/servlet/">Servlet总结</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstblog/">spring</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/film/" title="Film">
+              Film
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstflimreview/">2021春节档前瞻</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+
+      
+    </div>
+  </section>
+  
+
+  <section class="ui attached segment header-socials">
+    <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class=" mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class=" linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class=" github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+  </section>
+
+  <section class="ui bottom attached center aligned segment">
+    
+      <p>© 2021 kingkiller’s blog</p>
+    
+
+    <p>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> with theme <a href="https://github.com/g1eny0ung/hugo-theme-dream" target="_blank">Dream</a>.</p>
+
+    
+  </section>
+</article>
+
+  </aside>
+</div>
+
+          </div>
+        </section>
+        <section class="back">
+          <div class="dream-max-width">
+            <div class="ui centered relaxed grid dream-grid dream-back">
+  
+  
+  
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    <article>
+      <div class="ui top attached segment">
+        <h3 class="ui header">Social Links</h3>
+      </div>
+      <div class="ui bottom attached segment">
+        <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class="large mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class="large linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class="large github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+      </div>
+    </article>
+  </section>
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    
+  </section>
+
+  
+    
+  
+</div>
+
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+  window.defaultDark =  null 
+  window.backgroundDark =  null 
+  window.backgroundImageDark =  null 
+  window.darkNav =  true 
+  window.hasTwitterEmbed =  null 
+
+  if (window.hasTwitterEmbed) {
+    
+    window.twttr = (function (d, s, id) {
+      var js,
+        fjs = d.getElementsByTagName(s)[0],
+        t = window.twttr || {}
+      if (d.getElementById(id)) return t
+      js = d.createElement(s)
+      js.id = id
+      js.src = 'https://platform.twitter.com/widgets.js'
+      fjs.parentNode.insertBefore(js, fjs)
+
+      t._e = []
+      t.ready = function (f) {
+        t._e.push(f)
+      }
+
+      return t
+    })(document, 'script', 'twitter-wjs')
+  }
+</script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/semantic.min.js"></script>
+<script src="/js/jquery.overlayScrollbars.min.js"></script>
+<script src="/js/header.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/theme.js"></script>
+
+    
+<script src="/js/html2canvas.min.js"></script>
+<script src="/js/post.js"></script>
+
+
+
+
+
+    
+      <div class="ui inverted segment" id="dream-search">
+  <div class="ui search">
+    <div class="ui transparent input">
+      <input class="prompt" type="text" placeholder="Search" />
+    </div>
+    <div class="results"></div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    $.getJSON('http:\/\/www.kingkiller.cn/index.json', function (data) {
+      $('.ui.search').search({
+        source: data,
+        searchFields: ['title'],
+        showNoResults: true,
+      })
+    })
+  })
+</script>
+<script src="/js/search.js"></script>
+
+    
+
+    
+
+    
+  </body>
+</html>

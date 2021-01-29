@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>review | kingkiller’s blog</title>
+    <title>机器学习(-):一元线性回归 | kingkiller’s blog</title>
 
     
 
@@ -17,20 +17,21 @@
 
 <meta name="generator" content="Hugo 0.80.0" />
 
-<link rel="canonical" href="http://www.kingkiller.cn/tags/review/" />
+<link rel="canonical" href="http://www.kingkiller.cn/post/liner/" />
 
 
-<meta property="og:title" content="review" />
-<meta property="og:description" content="soz ceo" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="http://www.kingkiller.cn/tags/review/" />
-<meta property="og:updated_time" content="2021-01-28T17:09:18+08:00" />
+<meta property="og:title" content="机器学习(-):一元线性回归" />
+<meta property="og:description" content="机器学习中一元线性回归的概念和简单实现" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://www.kingkiller.cn/post/liner/" />
+<meta property="article:published_time" content="2021-01-29T18:43:31+08:00" />
+<meta property="article:modified_time" content="2021-01-29T18:43:31+08:00" />
 
 
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="review"/>
-<meta name="twitter:description" content="soz ceo"/>
+<meta name="twitter:title" content="机器学习(-):一元线性回归"/>
+<meta name="twitter:description" content="机器学习中一元线性回归的概念和简单实现"/>
 
 
 <link rel="stylesheet" href="/css/semantic.min.css" />
@@ -65,7 +66,13 @@
   
 </style>
 
-     
+    
+
+
+
+
+
+
     
   </head>
 
@@ -95,7 +102,101 @@
           <div class="dream-max-width">
             
 <div class="ui centered relaxed grid dream-grid">
-  <div class="sixteen wide mobile eight wide tablet eight wide computer four wide large screen four wide widescreen column dream-column">
+  <div class="sixteen wide mobile sixteen wide tablet twelve wide computer column markdown-body dream-single" id="dream-save-post-as-img">
+    
+    <section class="ui top attached segment">
+      <header>
+        <h1 class="ui large header">
+          机器学习(-):一元线性回归
+          <div class="sub header">
+            @
+            
+              
+                kingkiller
+              
+            
+
+            | 
+                Friday, Jan 29, 2021
+              
+
+            | 1 minutes read
+
+            | Update at
+              
+                Friday, Jan 29, 2021
+              
+          </div>
+        </h1>
+      </header>
+
+      <article class="main"><p>机器学习中一元线性回归的概念和简单实现</p>
+<h1 id="一元线性回归">一元线性回归</h1>
+<h2 id="1回归">1.回归</h2>
+<p>回归一词最早由英国科学家弗朗西斯·高尔顿提出,生物学家.深受进化论思想影响,并把该思想引入到人类研究,从遗传的角度解释个体的差异形成的原因.</p>
+<p>高尔顿发现,虽然有一个趋势:父母高,儿女也高,父母矮,儿女也矮.但给定父母的身高,儿女辈的身高却趋向于或者&quot;回归&quot;到全体人口的平均水平.换句话说,即使父母双方都异常高或者异常矮,儿女的身高还是会趋向于人口的平均水平.这也就是所谓的普遍回归规律</p>
+<h2 id="2一元线性回归">2.一元线性回归</h2>
+<p>1.回归分析(regression analysis)用来建立方程模拟两个或者多个变量之间如何关联</p>
+<p>2.被预测的变量叫做:因变量(dependent variable),输出(output)</p>
+<p>3.被用来进行预测的变量叫做:自变量(independent variable),输入(input)</p>
+<p>4.一元线性回归包含一个自变量和一个因变量</p>
+<p>5.两个变量的关系用一条直线来模拟</p>
+<p>6.如果包含两个以上的自变量,则称为多元回归分析(multiple regression)</p>
+<p>h~θ~(x) = θ~0~ + θ~1~x</p>
+<p>这个方程对应的图像是一条直线,称作回归线.其中, θ~1~为回归线的斜率, θ~0~为回归线的截距</p>
+<h2 id="3房价预测模型">3.房价预测模型</h2>
+<p>1.基本思路:</p>
+<pre><code class="language-mermaid" data-lang="mermaid">graph TD
+A(Training Set) --&gt; B(Learning Algorithm)
+	B --&gt; C(h)
+
+
+</code></pre><pre><code class="language-mermaid" data-lang="mermaid">graph LR
+A[size of house]  --&gt; B(h)
+	B --&gt; C[Estimated price]
+</code></pre><h2 id="4代价函数损失函数">4.代价函数(损失函数)</h2>
+<h2 id="5梯度下降法">5.梯度下降法</h2></article>
+    </section>
+
+    <footer class="ui attached segment dream-tags" data-html2canvas-ignore>
+      
+        
+          <a class="ui label" href="/tags/ai" title="AI">AI</a>
+        
+      
+      <div
+        class="ui label"
+        style="float: right; cursor: pointer;"
+        onclick="savePostAsImg()">
+        <i class="save icon"></i>Save as image
+      </div>
+    </footer>
+
+    
+
+    
+    
+    
+
+    
+
+  </div>
+  <aside class="sixteen wide mobile sixteen wide tablet four wide computer column dream-single-aside">
+    
+    
+      <div class="ui segment toc">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1回归">1.回归</a></li>
+    <li><a href="#2一元线性回归">2.一元线性回归</a></li>
+    <li><a href="#3房价预测模型">3.房价预测模型</a></li>
+    <li><a href="#4代价函数损失函数">4.代价函数(损失函数)</a></li>
+    <li><a href="#5梯度下降法">5.梯度下降法</a></li>
+  </ul>
+</nav>
+      </div>
+    
+
     <article class="dream-header">
   <section class="ui top attached center aligned segment">
     <div class="ui small circular image">
@@ -105,12 +206,12 @@
     </div>
 
     
-    <div class="ui medium header">
+    <h1 class="ui medium header">
     
       kingkiller&#39;s blog
       <div class="sub header" style="margin-top: 0.5rem;"></div>
     
-    </div>
+    </h1>
     
 
     <div class="ui horizontal list">
@@ -313,46 +414,7 @@
   </section>
 </article>
 
-  </div>
-
-  
-  
-    <div class="sixteen wide mobile eight wide tablet eight wide computer four wide large screen four wide widescreen column dream-column">
-      <article class="ui attached segment card dream-card">
-  <a class="image" href="http://www.kingkiller.cn/post/firstflimreview/">
-    
-      <img src="/img/springDang.jpg" alt="2021春节档前瞻" />
-    
-  </a>
-
-  <div class="content">
-    <h2 class="ui medium header">
-      <a href="/post/firstflimreview/">2021春节档前瞻</a>
-    </h2>
-    <div class="meta">
-      <p class="date">Thursday, Jan 28, 2021</p>
-    </div>
-    <div class="description">
-      2021年的春节档前瞻，经历了惨淡的2020年，内地电影市场准备在2021年开春就做出冲击
-    </div>
-  </div>
-
-  <div class="extra content">
-    <div class="author"><img class="ui avatar image" src="/img/avatar.jpg" />kingkiller</div>
-    <div class="reading-time">
-      <i class="clock icon"></i>1 minute read</div>
-  </div>
-</article>
-
-    </div>
-  
-
-  <div class="sixteen wide mobile eight wide tablet eight wide computer four wide large screen four wide widescreen column dream-column">
-    
-
-
-
-  </div>
+  </aside>
 </div>
 
           </div>
@@ -463,9 +525,11 @@
 <script src="/js/theme.js"></script>
 
     
-<script src="/js/imagesloaded.pkgd.min.js"></script>
-<script src="/js/masonry.pkgd.min.js"></script>
-<script src="/js/grid.js"></script>
+<script src="/js/html2canvas.min.js"></script>
+<script src="/js/post.js"></script>
+
+
+
 
 
     
