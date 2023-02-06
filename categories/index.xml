@@ -2,26 +2,26 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on kingkiller’s blog</title>
-    <link>http://www.kingkiller.cn/categories/</link>
+    <link>http:www.kingkiller.cn/categories/</link>
     <description>Recent content in Categories on kingkiller’s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 29 Jan 2021 19:10:13 +0800</lastBuildDate><atom:link href="http://www.kingkiller.cn/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 06 Feb 2023 23:07:23 +0800</lastBuildDate><atom:link href="http:www.kingkiller.cn/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>code</title>
-      <link>http://www.kingkiller.cn/categories/code/</link>
-      <pubDate>Fri, 29 Jan 2021 19:10:13 +0800</pubDate>
+      <link>http:www.kingkiller.cn/categories/code/</link>
+      <pubDate>Mon, 06 Feb 2023 23:07:23 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/categories/code/</guid>
+      <guid>http:www.kingkiller.cn/categories/code/</guid>
       <description></description>
     </item>
     
     <item>
       <title>film</title>
-      <link>http://www.kingkiller.cn/categories/film/</link>
+      <link>http:www.kingkiller.cn/categories/film/</link>
       <pubDate>Thu, 28 Jan 2021 17:09:18 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/categories/film/</guid>
+      <guid>http:www.kingkiller.cn/categories/film/</guid>
       <description></description>
     </item>
     

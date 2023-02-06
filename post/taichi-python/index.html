@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Taichi源码分析（一） | kingkiller’s blog</title>
+
+    
+
+
+
+<meta name="author" content="kingkiller" />
+<meta name="description" content="soz ceo" />
+
+
+
+<meta name="generator" content="Hugo 0.80.0" />
+
+<link rel="canonical" href="http:www.kingkiller.cn/post/taichi-python/" />
+
+
+<meta property="og:title" content="Taichi源码分析（一）" />
+<meta property="og:description" content="Taichi编译链路之Python部分的生命周期" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http:www.kingkiller.cn/post/taichi-python/" />
+<meta property="article:published_time" content="2023-02-06T23:07:23+08:00" />
+<meta property="article:modified_time" content="2023-02-06T23:07:23+08:00" />
+
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Taichi源码分析（一）"/>
+<meta name="twitter:description" content="Taichi编译链路之Python部分的生命周期"/>
+
+
+<link rel="stylesheet" href="/css/semantic.min.css" />
+<link rel="stylesheet" href="/css/icomoon.css" />
+<link rel="stylesheet" href="/css/OverlayScrollbars.min.css" />
+<link rel="stylesheet" href="/css/github-markdown.css" />
+<link rel="stylesheet" href="/css/site.css" />
+
+<style>
+  a:hover {
+    text-decoration: underline;
+  }
+
+  
+  a {
+    color: seagreen !important;
+  }
+  
+
+  
+
+  
+  body.default {
+    
+
+    
+    background-image: url(/img/bg0.jpg);
+    
+  }
+  
+
+  
+</style>
+
+    
+
+
+
+
+
+
+    
+  </head>
+
+  <body class="default">
+    
+<nav class="ui secondary inverted menu dream-menu">
+
+  <div class="item">
+    <i class="large link bullseye icon dream-flip-toggle" title="Flip it!"></i>
+  </div>
+  <div class="item">
+    <i class="large link home icon" title="Home" onclick="window.location.href = 'http:www.kingkiller.cn\/'"></i>
+  </div>
+  <div class="item">
+    <i class="large link icon theme-switch" onclick="themeSwitch()"></i>
+  </div>
+  
+  <div class="item">
+    <i class="large link search icon" onclick="toggleSearch()"></i>
+  </div>
+  
+</nav>
+
+    <div class="flip-container">
+      <div class="flipper">
+        <section class="front">
+          <div class="dream-max-width">
+            
+<div class="ui centered relaxed grid dream-grid">
+  <div class="sixteen wide mobile sixteen wide tablet twelve wide computer column markdown-body dream-single" id="dream-save-post-as-img">
+    
+    <section class="ui top attached segment">
+      <header>
+        <h1 class="ui large header">
+          Taichi源码分析（一）
+          <div class="sub header">
+            @
+            
+              
+                kingkiller
+              
+            
+
+            | 
+                Monday, Feb 6, 2023
+              
+
+            | 9 minutes read
+
+            | Update at
+              
+                Monday, Feb 6, 2023
+              
+          </div>
+        </h1>
+      </header>
+
+      <article class="main"><p>Taichi编译链路之Python部分的生命周期</p>
+<h1 id="taichi-源码分析一">Taichi 源码分析（一）</h1>
+<h2 id="1-taichi项目结构及源码编译">1. Taichi项目结构及源码编译</h2>
+<p>今天我没来探索一下taichi 程序的整体生命周期，首先我们先看一下taichi的项目结构</p>
+<p>文件层级很多，就没有树来进行展示了，直接看下面的截图</p>
+<p><img src="https://img-blog.csdnimg.cn/8ed6a8b87d2c44f58eb079b11748bca5.png#pic_center" alt="project structure"></p>
+<p>taichi 是一个eDSL语言，嵌入到python语言当中，利用了Python解释器作为了部分运行时，同时通过pybind链接到了底层taichi c++库， taichi语言的后端是利用c++实现高性能计算的。</p>
+<p>如上图所示，项目本身是一个CMake项目，在根目录中项目整体CMakeList.txt， README文档和版本文档等其他配置文件，setup.py用于安装taichi的python包。taichi项目根目录有13个文件夹，其中核心程序文件在taichi文件夹和python文件夹中，taichi文件夹内为taichi的c++源码，Python中是上层的python库。taichi文件内又分为了用于即时编译jit文件夹, 用于代码生成的codegen文件夹，用于pybind绑定的python文件夹等。根目录的python文件夹中taichi是Python项目的最基础包，所有库都从这个包中导入，大部分的语言项目的功能都在taichi.lang包中。</p>
+<p>现在我们来编译taichi程序，需要注意的是taichi项目中的第三包并没有加入到项目中，大家在克隆时需要试下下面的指令</p>
+<blockquote>
+<pre><code>git clone --recursive https://github.com/taichi-dev/taichi.git
+</code></pre></blockquote>
+<p>不过Eigen库所引用的仓库已经无法访问了，实测大家可以使用这个仓库的eigen代码（https://github.com/PX4/eigen）。taichi需要用到pybind和llvm等第三方包，大家需要自行安装这些，pybind全部为头文件实现，安装十分方便，从git仓库中下载完成后直接cmake安装即可。llvm的话太极官方为大家提供了他们自定义版LLVM的预编译文件，大家可以在这里下载对应版本https://github.com/taichi-dev/taichi_assets/releases。</p>
+<p>这些前置工作完成后直接，cmake + make build即可，将生成的pyd文件放到对应的python文件夹中，执行</p>
+<blockquote>
+<p>python setup.py</p>
+</blockquote>
+<p>到此就源码编译安装完成了。</p>
+<h2 id="2-python部分生命周期">2. Python部分生命周期</h2>
+<p>首先需要说明一下，此处虽说是讲Python部分的生命周期，但在初始化时taichi仍然调用了一部分pybind封装的c++代码，其中大部分都是用于初始化配置，我们也会顺带讲解一下，我仍认为这一部分属于Python部分的生命周期，等真正进入JIT编译时，才算是进入到C++部分的生命周期。</p>
+<h3 id="21-实例代码">2.1 实例代码</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> taichi <span style="color:#f92672">as</span> ti
+
+ti<span style="color:#f92672">.</span>init(arch<span style="color:#f92672">=</span>ti<span style="color:#f92672">.</span>cpu)
+
+x <span style="color:#f92672">=</span> ti<span style="color:#f92672">.</span>field(ti<span style="color:#f92672">.</span>i32, shape<span style="color:#f92672">=</span>(<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>))
+y <span style="color:#f92672">=</span> ti<span style="color:#f92672">.</span>ndarray(int, shape<span style="color:#f92672">=</span><span style="color:#ae81ff">16</span>)
+z <span style="color:#f92672">=</span> int(<span style="color:#ae81ff">100</span>)
+
+
+<span style="color:#a6e22e">@ti.kernel</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">play</span>(arg0: int, arg1: int):
+    tmp <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+
+    <span style="color:#66d9ef">if</span> arg1:
+        tmp <span style="color:#f92672">=</span> tmp <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>
+
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">10</span>):
+        tmp <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+
+    <span style="color:#66d9ef">print</span>(tmp)
+
+    <span style="color:#66d9ef">assert</span> z <span style="color:#f92672">==</span> <span style="color:#ae81ff">100</span>
+    <span style="color:#66d9ef">print</span>(z)
+    
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> x:
+        x[i] <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> y:
+        ti<span style="color:#f92672">.</span>atomic_add(y[i], <span style="color:#ae81ff">5</span>)
+
+
+play(<span style="color:#ae81ff">10</span>, True)
+</code></pre></div><p>下面我们以上面那段代码为例，taichi程序会分为两个部分，一部分是属于Python scope中的，而另一部分被装饰器所修饰的代码是属于taichi scope中的，可以看到taichi scope中的也会调用到Python全局中的field变量，这一部分我们暂时不考虑，taichi中的全局field变量会通过特殊处理链接到taichi程序中去，我们分开两部分来看，我们首先先看不含这些全局变量的taichi程序的生命周期是如何的，即我们这次调试的代码为下面的情况：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> taichi <span style="color:#f92672">as</span> ti
+
+ti<span style="color:#f92672">.</span>init(arch<span style="color:#f92672">=</span>ti<span style="color:#f92672">.</span>cpu)
+
+<span style="color:#75715e"># x = ti.field(ti.i32, shape=(3, 4))</span>
+<span style="color:#75715e"># y = ti.ndarray(int, shape=16)</span>
+<span style="color:#75715e"># z = int(100)</span>
+
+
+<span style="color:#a6e22e">@ti.kernel</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">play</span>(arg0: int, arg1: int):
+    tmp <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+
+    <span style="color:#66d9ef">if</span> arg1:
+        tmp <span style="color:#f92672">=</span> tmp <span style="color:#f92672">+</span> <span style="color:#ae81ff">4</span>
+
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(<span style="color:#ae81ff">10</span>):
+        tmp <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+
+    <span style="color:#66d9ef">print</span>(tmp)
+
+    <span style="color:#75715e"># assert z == 100</span>
+    <span style="color:#75715e"># print(z)</span>
+    <span style="color:#75715e">#</span>
+    <span style="color:#75715e"># for i in x:</span>
+    <span style="color:#75715e">#     x[i] = 0</span>
+    <span style="color:#75715e">#</span>
+    <span style="color:#75715e"># for i in y:</span>
+    <span style="color:#75715e">#     ti.atomic_add(y[i], 5)</span>
+
+
+play(<span style="color:#ae81ff">10</span>, True)
+</code></pre></div><h3 id="22-tachi-init">2.2 Tachi Init</h3>
+<p>可以看到要想加载taichi程序，我们会首先需要初始化taichi包，我这里使用的cpu作为后端进行运行。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">init</span>(arch<span style="color:#f92672">=</span>None,
+         default_fp<span style="color:#f92672">=</span>None,
+         default_ip<span style="color:#f92672">=</span>None,
+         _test_mode<span style="color:#f92672">=</span>False,
+         enable_fallback<span style="color:#f92672">=</span>True,
+         require_version<span style="color:#f92672">=</span>None,
+         <span style="color:#f92672">**</span>kwargs):
+    <span style="color:#75715e"># Check version for users every 7 days if not disabled by users.</span>
+    _version_check<span style="color:#f92672">.</span>start_version_check_thread()
+
+</code></pre></div><p>在运行init函数之前，taichi包中有很多全局变量，下面一个是会伴随我们整个生命周期的一个Python全局变量PyTaichi，他在taichi.lang包下的impl模块中被定义</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PyTaichi</span>:
+    <span style="color:#66d9ef">def</span> __init__(self, kernels<span style="color:#f92672">=</span>None):
+        self<span style="color:#f92672">.</span>materialized <span style="color:#f92672">=</span> False
+        self<span style="color:#f92672">.</span>prog <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>compiled_functions <span style="color:#f92672">=</span> {}
+        self<span style="color:#f92672">.</span>src_info_stack <span style="color:#f92672">=</span> []
+        self<span style="color:#f92672">.</span>inside_kernel <span style="color:#f92672">=</span> False
+        self<span style="color:#f92672">.</span>current_kernel <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>global_vars <span style="color:#f92672">=</span> []
+        self<span style="color:#f92672">.</span>grad_vars <span style="color:#f92672">=</span> []
+        self<span style="color:#f92672">.</span>dual_vars <span style="color:#f92672">=</span> []
+        self<span style="color:#f92672">.</span>matrix_fields <span style="color:#f92672">=</span> []
+        self<span style="color:#f92672">.</span>default_fp <span style="color:#f92672">=</span> f32
+        self<span style="color:#f92672">.</span>default_ip <span style="color:#f92672">=</span> i32
+        self<span style="color:#f92672">.</span>default_up <span style="color:#f92672">=</span> u32
+        self<span style="color:#f92672">.</span>target_tape <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>fwd_mode_manager <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>grad_replaced <span style="color:#f92672">=</span> False
+        self<span style="color:#f92672">.</span>kernels <span style="color:#f92672">=</span> kernels <span style="color:#f92672">or</span> []
+        self<span style="color:#f92672">.</span>_signal_handler_registry <span style="color:#f92672">=</span> None
+</code></pre></div><p>PyTaichi的初始化只是单纯的对成员函数赋初值。</p>
+<p>而我们之前调用的init函数是一大串初始化配置的代码，在开始时会进行版本的检查</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">start_version_check_thread</span>():
+    skip <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>environ<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;TI_SKIP_VERSION_CHECK&#34;</span>)
+    <span style="color:#66d9ef">if</span> skip <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#39;ON&#39;</span>:
+        <span style="color:#75715e"># We don&#39;t join this thread because we do not wish to block users.</span>
+        check_version_thread <span style="color:#f92672">=</span> threading<span style="color:#f92672">.</span>Thread(target<span style="color:#f92672">=</span>try_check_version,
+                                                daemon<span style="color:#f92672">=</span>True)
+        check_version_thread<span style="color:#f92672">.</span>start()
+</code></pre></div><p>此处开启多线程进行版本检查，实际运行函数为try_check_version</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">try_check_version</span>():
+    <span style="color:#66d9ef">try</span>:
+        os<span style="color:#f92672">.</span>makedirs(_ti_core<span style="color:#f92672">.</span>get_repo_dir(), exist_ok<span style="color:#f92672">=</span>True)
+        version_info_path <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>join(_ti_core<span style="color:#f92672">.</span>get_repo_dir(),
+                                         <span style="color:#e6db74">&#39;version_info&#39;</span>)
+        cur_date <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>date<span style="color:#f92672">.</span>today()
+        <span style="color:#66d9ef">if</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>exists(version_info_path):
+            <span style="color:#66d9ef">with</span> open(version_info_path, <span style="color:#e6db74">&#39;r&#39;</span>) <span style="color:#66d9ef">as</span> f:
+                version_info_file <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span>readlines()
+                last_time <span style="color:#f92672">=</span> version_info_file[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">.</span>rstrip()
+                cur_uuid <span style="color:#f92672">=</span> version_info_file[<span style="color:#ae81ff">2</span>]<span style="color:#f92672">.</span>rstrip()
+            <span style="color:#66d9ef">if</span> cur_date<span style="color:#f92672">.</span>strftime(<span style="color:#e6db74">&#39;%Y-%m-</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span>) <span style="color:#f92672">&gt;</span> last_time:
+                response <span style="color:#f92672">=</span> check_version(cur_uuid)
+                write_version_info(response, cur_uuid, version_info_path,
+                                   cur_date)
+        <span style="color:#66d9ef">else</span>:
+            cur_uuid <span style="color:#f92672">=</span> str(uuid<span style="color:#f92672">.</span>uuid4())
+            write_version_info({<span style="color:#e6db74">&#39;status&#39;</span>: <span style="color:#ae81ff">0</span>}, cur_uuid, version_info_path,
+                               cur_date)
+            response <span style="color:#f92672">=</span> check_version(cur_uuid)
+            write_version_info(response, cur_uuid, version_info_path, cur_date)
+    <span style="color:#75715e"># Wildcard exception to catch potential file writing errors.</span>
+    <span style="color:#66d9ef">except</span>:
+        <span style="color:#66d9ef">pass</span>
+</code></pre></div><p>在这个函数中，第一次运行taichi程序时会创建了一个taichi_cache文件夹用于放置临时缓存，windows默认在C盘根目录。同样在第一次运行时会在taichi_cache文件夹中创建一个version_info文件，这个文件内容是一传版本字符串，由时期+uuid组成，如果当前日期大于最后一次更新日期，需要对版本进行更新，日期判断只精确到天。</p>
+<p>之后回到init函数中。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">current_dir <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>getcwd()
+
+<span style="color:#66d9ef">if</span> require_version <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> None:
+    check_require_version(require_version)
+
+<span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;packed&#34;</span> <span style="color:#f92672">in</span> kwargs:
+    <span style="color:#66d9ef">if</span> kwargs[<span style="color:#e6db74">&#34;packed&#34;</span>] <span style="color:#f92672">is</span> True:
+        warnings<span style="color:#f92672">.</span>warn(
+            <span style="color:#e6db74">&#34;Currently packed=True is the default setting and the switch will be removed in v1.4.0.&#34;</span>,
+            <span style="color:#a6e22e">DeprecationWarning</span>)
+    <span style="color:#66d9ef">else</span>:
+        warnings<span style="color:#f92672">.</span>warn(
+            <span style="color:#e6db74">&#34;The automatic padding mode (packed=False) will no longer exist in v1.4.0. The switch will &#34;</span>
+            <span style="color:#e6db74">&#34;also be removed then. Make sure your code doesn&#39;t rely on it.&#34;</span>,
+            <span style="color:#a6e22e">DeprecationWarning</span>)
+
+<span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#34;default_up&#34;</span> <span style="color:#f92672">in</span> kwargs:
+    <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">KeyError</span>(
+        <span style="color:#e6db74">&#34;&#39;default_up&#39; is always the unsigned type of &#39;default_ip&#39;. Please set &#39;default_ip&#39; instead.&#34;</span>
+    )
+default_fp <span style="color:#f92672">=</span> deepcopy(default_fp)
+default_ip <span style="color:#f92672">=</span> deepcopy(default_ip)
+kwargs <span style="color:#f92672">=</span> deepcopy(kwargs)
+</code></pre></div><p>之后获取到了当前运行的py文件所在的文件夹，对参数中进行了检测，如果存在不合法会进行警告和报错，对合法参数进行深拷贝复制。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">reset</span>():
+    <span style="color:#66d9ef">global</span> pytaichi
+    old_kernels <span style="color:#f92672">=</span> pytaichi<span style="color:#f92672">.</span>kernels
+    pytaichi<span style="color:#f92672">.</span>clear()
+    pytaichi <span style="color:#f92672">=</span> PyTaichi(old_kernels)
+    <span style="color:#66d9ef">for</span> k <span style="color:#f92672">in</span> old_kernels:
+        k<span style="color:#f92672">.</span>reset()
+</code></pre></div><p>之后进行reset操作，reset的具体实现在Impl中，清空当前全局的pytaichi变量中的kernel集合，并对每一个kernel进行复位。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">cfg <span style="color:#f92672">=</span> impl<span style="color:#f92672">.</span>default_cfg()
+cfg<span style="color:#f92672">.</span>offline_cache <span style="color:#f92672">=</span> True  <span style="color:#75715e"># Enable offline cache in frontend instead of C++ side</span>
+
+spec_cfg <span style="color:#f92672">=</span> _SpecialConfig()
+env_comp <span style="color:#f92672">=</span> _EnvironmentConfigurator(kwargs, cfg)
+env_spec <span style="color:#f92672">=</span> _EnvironmentConfigurator(kwargs, spec_cfg)
+
+<span style="color:#75715e"># configure default_fp/ip:</span>
+<span style="color:#75715e"># TODO: move these stuff to _SpecialConfig too:</span>
+env_default_fp <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>environ<span style="color:#f92672">.</span>get(<span style="color:#e6db74">&#34;TI_DEFAULT_FP&#34;</span>)
+	<span style="color:#f92672">......</span>
+
+<span style="color:#66d9ef">if</span> default_fp <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> None:
+    impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>set_default_fp(default_fp)
+<span style="color:#66d9ef">if</span> default_ip <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> None:
+    impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>set_default_ip(default_ip)
+</code></pre></div><p>接下来就是进行配置设置，上面代码全为配置设置，获取的Config类是由C++ Pybind绑定的，如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">CompileConfig</span> {
+  Arch arch;
+  <span style="color:#66d9ef">bool</span> debug;
+  <span style="color:#66d9ef">bool</span> cfg_optimization;
+  <span style="color:#66d9ef">bool</span> check_out_of_bound;
+  <span style="color:#66d9ef">bool</span> validate_autodiff;
+  <span style="color:#66d9ef">int</span> simd_width;
+  <span style="color:#66d9ef">int</span> opt_level;
+  <span style="color:#66d9ef">int</span> external_optimization_level;
+  <span style="color:#66d9ef">int</span> max_vector_width;
+  <span style="color:#66d9ef">bool</span> packed;
+  <span style="color:#66d9ef">bool</span> print_preprocessed_ir;
+	 ......
+
+  CompileConfig();
+};
+</code></pre></div><p>默认的配置都是对这些成员变量进行初始化，接下来的是一些特殊环境配置，我初始化时并没有进行设置，这些部分都是默认值，大部分的控制流都不会进入，之后是加入日志等级和gdb等信息。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># compiler configurations (ti.cfg):</span>
+<span style="color:#66d9ef">for</span> key <span style="color:#f92672">in</span> dir(cfg):
+    <span style="color:#66d9ef">if</span> key <span style="color:#f92672">in</span> [<span style="color:#e6db74">&#39;arch&#39;</span>, <span style="color:#e6db74">&#39;default_fp&#39;</span>, <span style="color:#e6db74">&#39;default_ip&#39;</span>]:
+        <span style="color:#66d9ef">continue</span>
+    _cast <span style="color:#f92672">=</span> type(getattr(cfg, key))
+    <span style="color:#66d9ef">if</span> _cast <span style="color:#f92672">is</span> bool:
+        _cast <span style="color:#f92672">=</span> None
+    env_comp<span style="color:#f92672">.</span>add(key, _cast)
+
+unexpected_keys <span style="color:#f92672">=</span> kwargs<span style="color:#f92672">.</span>keys()
+</code></pre></div><p>逐级遍历Config中的属性，将属性名作为键值，类型作为value存到env.comp中。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">unexpected_keys <span style="color:#f92672">=</span> kwargs<span style="color:#f92672">.</span>keys()
+
+<span style="color:#66d9ef">if</span> len(unexpected_keys):
+    <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">KeyError</span>(
+        f<span style="color:#e6db74">&#39;Unrecognized keyword argument(s) for ti.init: {&#34;, &#34;.join(unexpected_keys)}&#39;</span>
+    )
+</code></pre></div><p>之后是查看是否有不需要的参数，有则报错</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">get_default_kernel_profiler()<span style="color:#f92672">.</span>set_kernel_profiler_mode(cfg<span style="color:#f92672">.</span>kernel_profiler)
+
+<span style="color:#75715e"># create a new program:</span>
+impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>create_program()
+
+_logging<span style="color:#f92672">.</span>trace(<span style="color:#e6db74">&#39;Materializing runtime...&#39;</span>)
+impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>prog<span style="color:#f92672">.</span>materialize_runtime()
+
+impl<span style="color:#f92672">.</span>_root_fb <span style="color:#f92672">=</span> _snode<span style="color:#f92672">.</span>FieldsBuilder()
+
+<span style="color:#66d9ef">if</span> cfg<span style="color:#f92672">.</span>debug:
+    impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>_register_signal_handlers()
+
+os<span style="color:#f92672">.</span>chdir(current_dir)
+<span style="color:#66d9ef">return</span> None
+</code></pre></div><p>接下来就是初始化一些核心类用于创建和编译Kernel。这里首先会创建一个Program，这个Program可以视为一个整体的Taichi程序，会存放全部的filed等全局变量和所有的kernel。Program是一个c++类，通过Pybind绑定成Python对象，Program本身并不提供任何实现，具体实现有其子类提供，默认使用的是LLVM版本的Program，这段代码可以在taichi项目中的c++源码文件夹taichi下面的program文件夹中的program.cpp中找到：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Program<span style="color:#f92672">::</span>Program(Arch desired_arch) <span style="color:#f92672">:</span> snode_rw_accessors_bank_(<span style="color:#66d9ef">this</span>) {
+  TI_TRACE(<span style="color:#e6db74">&#34;Program initializing...&#34;</span>);
+  .......
+  main_thread_id_ <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>this_thread<span style="color:#f92672">::</span>get_id();
+  ......
+
+  profiler <span style="color:#f92672">=</span> make_profiler(config.arch, config.kernel_profiler);
+  <span style="color:#66d9ef">if</span> (arch_uses_llvm(config.arch)) {
+<span style="color:#75715e">#ifdef TI_WITH_LLVM
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (config.arch <span style="color:#f92672">!=</span> Arch<span style="color:#f92672">::</span>dx12) {
+      program_impl_ <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>make_unique<span style="color:#f92672">&lt;</span>LlvmProgramImpl<span style="color:#f92672">&gt;</span>(config, profiler.get());
+    } <span style="color:#66d9ef">else</span> {
+      <span style="color:#75715e">// NOTE: use Dx12ProgramImpl to avoid using LlvmRuntimeExecutor for dx12.
+</span><span style="color:#75715e"></span><span style="color:#75715e">#ifdef TI_WITH_DX12
+</span><span style="color:#75715e"></span>      TI_ASSERT(directx12<span style="color:#f92672">::</span>is_dx12_api_available());
+      program_impl_ <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>make_unique<span style="color:#f92672">&lt;</span>Dx12ProgramImpl<span style="color:#f92672">&gt;</span>(config);
+<span style="color:#75715e">#else
+</span><span style="color:#75715e"></span>      TI_ERROR(<span style="color:#e6db74">&#34;This taichi is not compiled with DX12&#34;</span>);
+<span style="color:#75715e">#endif
+</span><span style="color:#75715e"></span>    }
+<span style="color:#75715e">#else
+</span><span style="color:#75715e"></span>    TI_ERROR(<span style="color:#e6db74">&#34;This taichi is not compiled with LLVM&#34;</span>);
+<span style="color:#75715e">#endif
+</span><span style="color:#75715e"></span>  } <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span> (config.arch <span style="color:#f92672">==</span> Arch<span style="color:#f92672">::</span>metal) {
+<span style="color:#75715e">#ifdef TI_WITH_METAL
+</span><span style="color:#75715e"></span>    TI_ASSERT(metal<span style="color:#f92672">::</span>is_metal_api_available());
+    program_impl_ <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>make_unique<span style="color:#f92672">&lt;</span>MetalProgramImpl<span style="color:#f92672">&gt;</span>(config);
+<span style="color:#75715e">#else
+</span><span style="color:#75715e"></span>    TI_ERROR(<span style="color:#e6db74">&#34;This taichi is not compiled with Metal&#34;</span>)
+<span style="color:#75715e">#endif
+</span></code></pre></div><p>我们下面的也都以默认的LLVM版本的Program实现进行讲解，后续有时间我会讲解其他backend实现。</p>
+<p>让我们回到Python的init函数中去，在创建完Program后。调用了<code>materialize_runtime</code>方法来创建运行环境，我们具体来看一下LLVMProgramImpl的实现：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">materialize_runtime</span>(MemoryPool <span style="color:#f92672">*</span>memory_pool,
+                         KernelProfilerBase <span style="color:#f92672">*</span>profiler,
+                         uint64 <span style="color:#f92672">**</span>result_buffer_ptr) <span style="color:#66d9ef">override</span> {
+  runtime_exec_<span style="color:#f92672">-&gt;</span>materialize_runtime(memory_pool, profiler,
+                                     result_buffer_ptr);
+}
+</code></pre></div><p>额，又包了一层，这里调用的是其执行器的初始化方法，继续往下走可以看到这里是对jit进行一些配置。到此为止，超长的Init函数就看完了。</p>
+<h3 id="23-kernel装饰器">2.3 kernel装饰器</h3>
+<p>之后我们看一下<code>@ti.kernel</code>装饰器</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_kernel_impl</span>(_func, level_of_class_stackframe, verbose<span style="color:#f92672">=</span>False):
+    is_classkernel <span style="color:#f92672">=</span> _inside_class(level_of_class_stackframe <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)
+    <span style="color:#66d9ef">if</span> verbose:
+        <span style="color:#66d9ef">print</span>(f<span style="color:#e6db74">&#39;kernel={_func.__name__} is_classkernel={is_classkernel}&#39;</span>)
+    primal <span style="color:#f92672">=</span> Kernel(_func,
+                    autodiff_mode<span style="color:#f92672">=</span>AutodiffMode<span style="color:#f92672">.</span>NONE,
+                    _classkernel<span style="color:#f92672">=</span>is_classkernel)
+    adjoint <span style="color:#f92672">=</span> Kernel(_func,
+                     autodiff_mode<span style="color:#f92672">=</span>AutodiffMode<span style="color:#f92672">.</span>REVERSE,
+                     _classkernel<span style="color:#f92672">=</span>is_classkernel)
+    primal<span style="color:#f92672">.</span>grad <span style="color:#f92672">=</span> adjoint
+    <span style="color:#66d9ef">if</span> is_classkernel:
+        <span style="color:#a6e22e">@functools.wraps</span>(_func)
+        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wrapped</span>(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+            clsobj <span style="color:#f92672">=</span> type(args[<span style="color:#ae81ff">0</span>])
+            <span style="color:#66d9ef">assert</span> <span style="color:#f92672">not</span> hasattr(clsobj, <span style="color:#e6db74">&#39;_data_oriented&#39;</span>)
+            <span style="color:#66d9ef">raise</span> TaichiSyntaxError(
+                f<span style="color:#e6db74">&#39;Please decorate class {clsobj.__name__} with @ti.data_oriented&#39;</span>
+            )
+    <span style="color:#66d9ef">else</span>:
+        <span style="color:#a6e22e">@functools.wraps</span>(_func)
+        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">wrapped</span>(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+            <span style="color:#66d9ef">try</span>:
+                <span style="color:#66d9ef">return</span> primal(<span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs)
+            <span style="color:#66d9ef">except</span> (TaichiCompilationError, TaichiRuntimeError) <span style="color:#66d9ef">as</span> e:
+                <span style="color:#66d9ef">raise</span> type(e)(<span style="color:#e6db74">&#39;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">+</span> str(e)) <span style="color:#f92672">from</span> None
+        wrapped<span style="color:#f92672">.</span>grad <span style="color:#f92672">=</span> adjoint
+    wrapped<span style="color:#f92672">.</span>_is_wrapped_kernel <span style="color:#f92672">=</span> True
+    wrapped<span style="color:#f92672">.</span>_is_classkernel <span style="color:#f92672">=</span> is_classkernel
+    wrapped<span style="color:#f92672">.</span>_primal <span style="color:#f92672">=</span> primal
+    wrapped<span style="color:#f92672">.</span>_adjoint <span style="color:#f92672">=</span> adjoint
+    <span style="color:#66d9ef">return</span> wrapped
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">kernel</span>(fn):
+    <span style="color:#66d9ef">return</span> _kernel_impl(fn, level_of_class_stackframe<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
+</code></pre></div><p><code>kernel</code>是一个装饰器函数，其内部调用了<code>_kernel_impl</code>作为具体实现。这里首先判断了当前的kernel是否在一个类中，是的，taichi允许你在一个类中定义kernel，这给了开发者极大的便利，同时taichi用了非常巧妙的方式来处理在类中的Kernel，这里我们暂时不讨论，我先关注于在类外面的kernel函数。而<code>_inside_class</code>方法具体是如何判断是否在类中的，则用了我们的老朋友，<code>inspect</code>模块来获取解释器堆栈上的语句信息，通过正则匹配检测class关键字实现的。</p>
+<p>接下来实例化了两个Kernel类，这个Kernel类是taichi程序的编译核心，也是执行入口，具体编译过程在Kernel的<code>__call__</code>魔法函数中。</p>
+<p>之后是一个内部闭包wrapped，functools.wrap装饰器的作用是不改变调用对象，单纯改变所装饰对象的一些属性，也就是这里最后返回的是wrapped函数，但是属性则依然是传入的play函数，所以我们打印play函数的<code>__name__</code>和<code>__doc__</code>属性就会发现没有发生改变，但是具体调用逻辑则是调用Kernel的<code>__call__</code>函数。</p>
+<p>那我们接下来就很好看一下Kernel这个类：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Kernel</span>:
+    counter <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+
+    <span style="color:#66d9ef">def</span> __init__(self, _func, autodiff_mode, _classkernel<span style="color:#f92672">=</span>False):
+        self<span style="color:#f92672">.</span>func <span style="color:#f92672">=</span> _func
+        self<span style="color:#f92672">.</span>kernel_counter <span style="color:#f92672">=</span> Kernel<span style="color:#f92672">.</span>counter
+        Kernel<span style="color:#f92672">.</span>counter <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+        <span style="color:#66d9ef">assert</span> autodiff_mode <span style="color:#f92672">in</span> (AutodiffMode<span style="color:#f92672">.</span>NONE, AutodiffMode<span style="color:#f92672">.</span>VALIDATION,
+                                 AutodiffMode<span style="color:#f92672">.</span>FORWARD, AutodiffMode<span style="color:#f92672">.</span>REVERSE)
+        self<span style="color:#f92672">.</span>autodiff_mode <span style="color:#f92672">=</span> autodiff_mode
+        self<span style="color:#f92672">.</span>grad <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>arguments <span style="color:#f92672">=</span> []
+        self<span style="color:#f92672">.</span>return_type <span style="color:#f92672">=</span> None
+        self<span style="color:#f92672">.</span>classkernel <span style="color:#f92672">=</span> _classkernel
+        self<span style="color:#f92672">.</span>extract_arguments()
+        self<span style="color:#f92672">.</span>template_slot_locations <span style="color:#f92672">=</span> []
+        <span style="color:#66d9ef">for</span> i, arg <span style="color:#f92672">in</span> enumerate(self<span style="color:#f92672">.</span>arguments):
+            <span style="color:#66d9ef">if</span> isinstance(arg<span style="color:#f92672">.</span>annotation, template):
+                self<span style="color:#f92672">.</span>template_slot_locations<span style="color:#f92672">.</span>append(i)
+        self<span style="color:#f92672">.</span>mapper <span style="color:#f92672">=</span> TaichiCallableTemplateMapper(
+            self<span style="color:#f92672">.</span>arguments, self<span style="color:#f92672">.</span>template_slot_locations)
+        impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>kernels<span style="color:#f92672">.</span>append(self)
+        self<span style="color:#f92672">.</span>reset()
+        self<span style="color:#f92672">.</span>kernel_cpp <span style="color:#f92672">=</span> None
+        <span style="color:#75715e"># TODO[#5114]: get rid of compiled_functions and use compiled_kernels instead.</span>
+        <span style="color:#75715e"># Main motivation is that compiled_kernels can be potentially serialized in the AOT scenario.</span>
+        self<span style="color:#f92672">.</span>compiled_kernels <span style="color:#f92672">=</span> {}
+        self<span style="color:#f92672">.</span>has_print <span style="color:#f92672">=</span> False
+</code></pre></div><p>在初始化Kernel时，把所装饰的函数作为了当前func属性，获取当前kernel的计数器，之后静态成员变量counter+1。判断是否开启auto_diff，是否有自动微分等。之后通过extract_argument来获取函数形参参数：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">extract_arguments</span>(self):
+    sig <span style="color:#f92672">=</span> inspect<span style="color:#f92672">.</span>signature(self<span style="color:#f92672">.</span>func)
+    <span style="color:#66d9ef">if</span> sig<span style="color:#f92672">.</span>return_annotation <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> (inspect<span style="color:#f92672">.</span>_empty, None):
+        self<span style="color:#f92672">.</span>return_type <span style="color:#f92672">=</span> sig<span style="color:#f92672">.</span>return_annotation
+    params <span style="color:#f92672">=</span> sig<span style="color:#f92672">.</span>parameters
+    arg_names <span style="color:#f92672">=</span> params<span style="color:#f92672">.</span>keys()
+    <span style="color:#66d9ef">for</span> i, arg_name <span style="color:#f92672">in</span> enumerate(arg_names):
+        param <span style="color:#f92672">=</span> params[arg_name]
+        <span style="color:#66d9ef">if</span> param<span style="color:#f92672">.</span>kind <span style="color:#f92672">==</span> inspect<span style="color:#f92672">.</span>Parameter<span style="color:#f92672">.</span>VAR_KEYWORD:
+            <span style="color:#66d9ef">raise</span> TaichiSyntaxError(
+                <span style="color:#e6db74">&#39;Taichi kernels do not support variable keyword parameters (i.e., **kwargs)&#39;</span>
+            )
+		<span style="color:#f92672">......</span>
+        annotation <span style="color:#f92672">=</span> param<span style="color:#f92672">.</span>annotation
+        <span style="color:#66d9ef">if</span> param<span style="color:#f92672">.</span>annotation <span style="color:#f92672">is</span> inspect<span style="color:#f92672">.</span>Parameter<span style="color:#f92672">.</span>empty:
+            <span style="color:#66d9ef">if</span> i <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">and</span> self<span style="color:#f92672">.</span>classkernel:  <span style="color:#75715e"># The |self| parameter</span>
+                annotation <span style="color:#f92672">=</span> template()
+            <span style="color:#66d9ef">else</span>:
+                <span style="color:#66d9ef">raise</span> TaichiSyntaxError(
+                    <span style="color:#e6db74">&#39;Taichi kernels parameters must be type annotated&#39;</span>)
+		<span style="color:#f92672">......</span>
+        self<span style="color:#f92672">.</span>arguments<span style="color:#f92672">.</span>append(
+            KernelArgument(annotation, param<span style="color:#f92672">.</span>name, param<span style="color:#f92672">.</span>default))
+</code></pre></div><p>获取的方式当然又是我们的老熟人inspect模块，通过signature获取到func上的形参和返回值类型属性，之后是一大段参数类型的异常判断，在这里我们看到关键字参数，带初始值的参数都是不支持的。之后将这些参数加入到Kernel类的成员变量arguments中，Taichi在这里对参数又进行了一层包装，不过KernelArgument就是一个非常简单的data类了：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">KernelArgument</span>:
+    <span style="color:#66d9ef">def</span> __init__(self, _annotation, _name, _default<span style="color:#f92672">=</span>inspect<span style="color:#f92672">.</span>Parameter<span style="color:#f92672">.</span>empty):
+        self<span style="color:#f92672">.</span>annotation <span style="color:#f92672">=</span> _annotation
+        self<span style="color:#f92672">.</span>name <span style="color:#f92672">=</span> _name
+        self<span style="color:#f92672">.</span>default <span style="color:#f92672">=</span> _default
+</code></pre></div><p>让我们回到Kernel的构造函数，获取到函数参数后对这些形参进行了遍历，判断是否是Template类型参数，这里的Template是一个用Python定义的一个Data类，用于taichi的元编程使用，taichi的模板编程实现的方式我们也暂且不表。再往下是初始化了一个<code>TaichiCallbleTemplateMapper</code>这个map存储了参数了信息为后续调用时使用。随后将现在的kernel加入到我们之前提到的pytaichi全局变量中，那是一个Program类，存储了全部的kernel。再之后就是调用了reset函数：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">reset</span>(self):
+    self<span style="color:#f92672">.</span>runtime <span style="color:#f92672">=</span> impl<span style="color:#f92672">.</span>get_runtime()
+</code></pre></div><p>reset函数非常简单，把初始化当前runtime成员变量的方法提取出来以供复用，这里runtime所赋值的依然是pytaichi。到此Kernel的初始化工作基本完成了。</p>
+<p>Taichi所采用的对Python实施静态编译的策略与我们之前探讨的pytorch和qcor有所不同，他并不是在装饰器加载时就完成了jit编译，而是在第一次调用时才进行编译，下面我们就探究一下Kernel的<code>__call__</code>函数：</p>
+<h3 id="24-kernel的运行入口">2.4 kernel的运行入口</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a6e22e">@_shell_pop_print</span>
+<span style="color:#66d9ef">def</span> __call__(self, <span style="color:#f92672">*</span>args, <span style="color:#f92672">**</span>kwargs):
+    args <span style="color:#f92672">=</span> _process_args(self, args, kwargs)
+    <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>fwd_mode_manager <span style="color:#f92672">and</span> <span style="color:#f92672">not</span> self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>grad_replaced:
+        self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>fwd_mode_manager<span style="color:#f92672">.</span>insert(self)
+    <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>autodiff_mode <span style="color:#f92672">in</span> (
+            AutodiffMode<span style="color:#f92672">.</span>NONE, AutodiffMode<span style="color:#f92672">.</span>VALIDATION
+    ) <span style="color:#f92672">and</span> self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>target_tape <span style="color:#f92672">and</span> <span style="color:#f92672">not</span> self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>grad_replaced:
+        self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>target_tape<span style="color:#f92672">.</span>insert(self, args)
+    <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>autodiff_mode <span style="color:#f92672">!=</span> AutodiffMode<span style="color:#f92672">.</span>NONE <span style="color:#f92672">and</span> impl<span style="color:#f92672">.</span>current_cfg(
+    )<span style="color:#f92672">.</span>opt_level <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+        _logging<span style="color:#f92672">.</span>warn(
+            <span style="color:#e6db74">&#34;&#34;&#34;opt_level = 1 is enforced to enable gradient computation.&#34;&#34;&#34;</span>
+        )
+        impl<span style="color:#f92672">.</span>current_cfg()<span style="color:#f92672">.</span>opt_level <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+    key <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>ensure_compiled(<span style="color:#f92672">*</span>args)
+    <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>compiled_functions[key](<span style="color:#f92672">*</span>args)
+</code></pre></div><p>这段程序的代码量并不多，首先<code>_shell_pop_print</code>装饰器在绝大多数情况下冰不起作用，不会改变调用主体，只有在开启pybuf时会有一个额外处理，但依然会调用<code>__call__</code>函数，并将其返回值作为新函数返回值，只是会进行一步额外信息打印操作。</p>
+<p>之后对实参进行处理，这里的<code>_process_arg</code>主要做了参数校验的工作，判断了实参和形参的个数是否统一，并将<code>*args</code>解构赋值到一个list中返回。</p>
+<p>之后判断了是否启用了自动微分，在本例中未使用自动微分，这一步也不用考虑。之后就进入到了我们的编译环节，<code>ensure_compiled</code>函数代码如下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">ensure_compiled</span>(self, <span style="color:#f92672">*</span>args):
+    instance_id, arg_features <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>mapper<span style="color:#f92672">.</span>lookup(args)
+    key <span style="color:#f92672">=</span> (self<span style="color:#f92672">.</span>func, instance_id, self<span style="color:#f92672">.</span>autodiff_mode)
+    self<span style="color:#f92672">.</span>materialize(key<span style="color:#f92672">=</span>key, args<span style="color:#f92672">=</span>args, arg_features<span style="color:#f92672">=</span>arg_features)
+    <span style="color:#66d9ef">return</span> key
+</code></pre></div><p>这里调用<code>TaichiCallableTemplateMapper</code>的<code>loopup</code>功能获得的instance_id和arg_features分别为0和两个<code>'#'</code>字符串组成的list。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">materialize</span>(self, key<span style="color:#f92672">=</span>None, args<span style="color:#f92672">=</span>None, arg_features<span style="color:#f92672">=</span>None):
+    <span style="color:#66d9ef">if</span> key <span style="color:#f92672">is</span> None:
+        key <span style="color:#f92672">=</span> (self<span style="color:#f92672">.</span>func, <span style="color:#ae81ff">0</span>, self<span style="color:#f92672">.</span>autodiff_mode)
+    self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>materialize()
+    <span style="color:#66d9ef">if</span> key <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>compiled_functions:
+        <span style="color:#66d9ef">return</span>
+    grad_suffix <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+		<span style="color:#f92672">......</span>
+    kernel_name <span style="color:#f92672">=</span> f<span style="color:#e6db74">&#34;{self.func.__name__}_c{self.kernel_counter}_{key[1]}{grad_suffix}&#34;</span>
+    _logging<span style="color:#f92672">.</span>trace(f<span style="color:#e6db74">&#34;Compiling kernel {kernel_name}...&#34;</span>)
+
+    tree, ctx <span style="color:#f92672">=</span> _get_tree_and_ctx(
+        self,
+        args<span style="color:#f92672">=</span>args,
+        excluded_parameters<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>template_slot_locations,
+        arg_features<span style="color:#f92672">=</span>arg_features)
+
+    <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>autodiff_mode <span style="color:#f92672">!=</span> AutodiffMode<span style="color:#f92672">.</span>NONE:
+        KernelSimplicityASTChecker(self<span style="color:#f92672">.</span>func)<span style="color:#f92672">.</span>visit(tree)
+    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">taichi_ast_generator</span>(kernel_cxx):
+		<span style="color:#f92672">......</span>
+
+    taichi_kernel <span style="color:#f92672">=</span> impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>prog<span style="color:#f92672">.</span>create_kernel(
+        taichi_ast_generator, kernel_name, self<span style="color:#f92672">.</span>autodiff_mode)
+
+    self<span style="color:#f92672">.</span>kernel_cpp <span style="color:#f92672">=</span> taichi_kernel
+
+    <span style="color:#66d9ef">assert</span> key <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>compiled_functions
+    self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>compiled_functions[key] <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>get_function_body(
+        taichi_kernel)
+    self<span style="color:#f92672">.</span>compiled_kernels[key] <span style="color:#f92672">=</span> taichi_kernel
+</code></pre></div><p>上面是Kernel中的<code>materialize</code>函数，可以看到这里又调用了一次ProgramImpl的materialize，这个在之前Init的时候介绍过，主要是Jit相关的设置。之后进行判断是否进行过了编译，jit编译后的二进制代码会存放在内存中的，所以只需要第一次执行时进行编译即可，所以这里如果发现该kernel已经经过编译了，则这一步可以跳过。之后我们可以看到JIT函数的规则，Python本身的函数名+当前kernel序号构成，后面是一些附加信息，这一串规则可以巧妙的避免命名重复导致错误，同时比使用Uuid等方式随机产生的一大段随机字符串在长度方面小很多。我们此处的名称为<code>play_c76_0</code>这个也是我们之后实际调用JIT的函数名称。接下来这一段是用来获取Python AST树的：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_get_tree_and_ctx</span>(self,
+                      excluded_parameters<span style="color:#f92672">=</span>(),
+                      is_kernel<span style="color:#f92672">=</span>True,
+                      arg_features<span style="color:#f92672">=</span>None,
+                      args<span style="color:#f92672">=</span>None,
+                      ast_builder<span style="color:#f92672">=</span>None,
+                      is_real_function<span style="color:#f92672">=</span>False):
+    file <span style="color:#f92672">=</span> getsourcefile(self<span style="color:#f92672">.</span>func)
+    src, start_lineno <span style="color:#f92672">=</span> getsourcelines(self<span style="color:#f92672">.</span>func)
+    src <span style="color:#f92672">=</span> [textwrap<span style="color:#f92672">.</span>fill(line, tabsize<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>, width<span style="color:#f92672">=</span><span style="color:#ae81ff">9999</span>) <span style="color:#66d9ef">for</span> line <span style="color:#f92672">in</span> src]
+    tree <span style="color:#f92672">=</span> ast<span style="color:#f92672">.</span>parse(textwrap<span style="color:#f92672">.</span>dedent(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join(src)))
+
+    func_body <span style="color:#f92672">=</span> tree<span style="color:#f92672">.</span>body[<span style="color:#ae81ff">0</span>]
+    func_body<span style="color:#f92672">.</span>decorator_list <span style="color:#f92672">=</span> []
+
+    global_vars <span style="color:#f92672">=</span> _get_global_vars(self<span style="color:#f92672">.</span>func)
+    <span style="color:#66d9ef">for</span> i, arg <span style="color:#f92672">in</span> enumerate(func_body<span style="color:#f92672">.</span>args<span style="color:#f92672">.</span>args):
+        anno <span style="color:#f92672">=</span> arg<span style="color:#f92672">.</span>annotation
+        <span style="color:#66d9ef">if</span> isinstance(anno, ast<span style="color:#f92672">.</span>Name):
+            global_vars[anno<span style="color:#f92672">.</span>id] <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>arguments[i]<span style="color:#f92672">.</span>annotation
+
+    <span style="color:#66d9ef">if</span> isinstance(func_body<span style="color:#f92672">.</span>returns, ast<span style="color:#f92672">.</span>Name):
+        global_vars[func_body<span style="color:#f92672">.</span>returns<span style="color:#f92672">.</span>id] <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>return_type
+
+    <span style="color:#66d9ef">if</span> is_kernel <span style="color:#f92672">or</span> is_real_function:
+        <span style="color:#75715e"># inject template parameters into globals</span>
+        <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>template_slot_locations:
+            template_var_name <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>arguments[i]<span style="color:#f92672">.</span>name
+            global_vars[template_var_name] <span style="color:#f92672">=</span> args[i]
+
+    <span style="color:#66d9ef">return</span> tree, ASTTransformerContext(excluded_parameters<span style="color:#f92672">=</span>excluded_parameters,
+                                       is_kernel<span style="color:#f92672">=</span>is_kernel,
+                                       func<span style="color:#f92672">=</span>self,
+                                       arg_features<span style="color:#f92672">=</span>arg_features,
+                                       global_vars<span style="color:#f92672">=</span>global_vars,
+                                       argument_data<span style="color:#f92672">=</span>args,
+                                       src<span style="color:#f92672">=</span>src,
+                                       start_lineno<span style="color:#f92672">=</span>start_lineno,
+                                       file<span style="color:#f92672">=</span>file,
+                                       ast_builder<span style="color:#f92672">=</span>ast_builder,
+                                       is_real_function<span style="color:#f92672">=</span>is_real_function)
+</code></pre></div><p>又是我们的老朋友<code>inspect</code>模块，其实整体逻辑还是比较简单的，通过inspect模块获取到了所执行的文件路径和所执行的函数源码。之后通过<code>_get_global_vars</code>获取了全局变量，此处对闭包做了特殊处理。随后将参数和返回值类型加入到全局变量集合中。之后返回了ast树和taichi自己定义的用于做转换的Python类<code>ASTTransformerContext</code>（代码就不PO了，其实基本上算是一个Data类了，在初始化时没有做特殊操作）。</p>
+<p>之后我们回到<code>materialize</code>函数中，如果此时开启了auto_diff，则会对AST树进行解析，做一些语义检测，这里采取的是访问器模式，之后会详细开一期介绍taichi 在启用不同模式auto_diff情况下的生命周期。</p>
+<p>随后调用taichi的c++库来创建C++ Kernel对象并加入到当前pytaichi(上文提到的全局PyTaichi对象)的program中去。我们来看一下create_kernel的c++实现吧，这里其实在c++ pybind文件中，是一个匿名函数</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">.def(
+    <span style="color:#e6db74">&#34;create_kernel&#34;</span>,
+    [](Program <span style="color:#f92672">*</span>program, <span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>function<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">void</span>(Kernel <span style="color:#f92672">*</span>)<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&amp;</span>body,
+       <span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string <span style="color:#f92672">&amp;</span>name, AutodiffMode autodiff_mode) <span style="color:#f92672">-&gt;</span> Kernel <span style="color:#f92672">*</span> {
+      py<span style="color:#f92672">::</span>gil_scoped_release release;
+      <span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span>program<span style="color:#f92672">-&gt;</span>kernel(body, name, autodiff_mode);
+    },
+      
+Kernel <span style="color:#f92672">&amp;</span>Program<span style="color:#f92672">::</span>kernel(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>function<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">void</span>(Kernel <span style="color:#f92672">*</span>)<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&amp;</span>body,
+                 <span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string <span style="color:#f92672">&amp;</span>name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>,
+                 AutodiffMode autodiff_mode <span style="color:#f92672">=</span> AutodiffMode<span style="color:#f92672">::</span>kNone) {
+    <span style="color:#75715e">// Expr::set_allow_store(true);
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">auto</span> func <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>make_unique<span style="color:#f92672">&lt;</span>Kernel<span style="color:#f92672">&gt;</span>(<span style="color:#f92672">*</span><span style="color:#66d9ef">this</span>, body, name, autodiff_mode);
+    <span style="color:#75715e">// Expr::set_allow_store(false);
+</span><span style="color:#75715e"></span>    kernels.emplace_back(std<span style="color:#f92672">::</span>move(func));
+    <span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span>kernels.back();
+  }
+</code></pre></div><p>注意这里pybind中的<code>py::gil_scoped_release release;</code>这句话，这个是为了多线程情况下对GIL锁的处理，Python C API 规定全局解释器锁 (GIL) 必须始终由当前线程持有才能安全访问 Python 对象。因此，当 Python 通过 pybind11 调用 C++ 时，必须持有 GIL，而 pybind11 永远不会隐式释放 GIL，所以我们就需要手动释放和获取锁。</p>
+<p>pybind11 需要确保它正在调用 Python 代码时保持 GIL。如上，这里有趣的一点是我们这里传入的其实是一个Python函数给<code>std::function</code>类型参数作为一个回调，当c++调用该回调函数时需要确保持有GIL，这段会很复杂，我会在后续c++部分的生命周期的时候话一段时间来详解这一块。</p>
+<p>回到Python部分，接下来要处理的就是kernel装饰器所装饰的play函数本身了，<code>get_function_body</code>具体内容简单来说就是非常爽快的返回了一个闭包。这个闭包我们之后会用到，这里就直接将他加入到了pytaichi的<code>compiled_functions</code>字典中。之后将C++ Kernekl对象加入到当前Python Kernel类中的<code>compiled_kernels</code>字典中。</p>
+<p>在初始化Kernel阶段，会执行传入的回调函数，我们来具体看一下那个回调函数</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">taichi_ast_generator</span>(kernel_cxx):
+    <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>inside_kernel:
+        <span style="color:#66d9ef">raise</span> TaichiSyntaxError(<span style="color:#f92672">......</span>)
+    self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>inside_kernel <span style="color:#f92672">=</span> True
+    self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>current_kernel <span style="color:#f92672">=</span> self
+    <span style="color:#66d9ef">try</span>:
+        ctx<span style="color:#f92672">.</span>ast_builder <span style="color:#f92672">=</span> kernel_cxx<span style="color:#f92672">.</span>ast_builder()
+        transform_tree(tree, ctx)
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> ctx<span style="color:#f92672">.</span>is_real_function:
+            <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>return_type <span style="color:#f92672">and</span> ctx<span style="color:#f92672">.</span>returned <span style="color:#f92672">!=</span> ReturnStatus<span style="color:#f92672">.</span>ReturnedValue:
+                <span style="color:#66d9ef">raise</span> TaichiSyntaxError(
+                    <span style="color:#e6db74">&#34;Kernel has a return type but does not have a return statement&#34;</span>
+                )
+    <span style="color:#66d9ef">finally</span>:
+        self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>inside_kernel <span style="color:#f92672">=</span> False
+        self<span style="color:#f92672">.</span>runtime<span style="color:#f92672">.</span>current_kernel <span style="color:#f92672">=</span> None
+</code></pre></div><p>其实这个回调函数传入的kernel_cxx就是刚刚创建的c++的kernel类，获取的ast_build就FrotentContext默认的ASTBuilder， FrontentContext在创建Kernel示例时会创建。</p>
+<p>之后运行transform_tree函数，这一步其实这个回调最关键的时刻：</p>
+<p>这一步稍显复杂，这里通过递归来完成了build</p>
+<p>至此<code>ensure_compiled</code>功能就走完了，回到最初的<code>__call__</code>函数，最后操作即是从pytaichi的<code>compiled_functions</code>取出之前加入的闭包，并将闭包的结果当做kernel运行的结果返回。到此具体的编译过程正式展开（上面存在一步编译了，利用ast模块对play源码进行了parser，获取到了AST树，这里其实有一定优化空间，Python在对py文件整体编译时保存了AST树，可惜的是无法从Python语言层面去获取到这个内部对象，不过可以拓展cpython来实现这一功能，但是稍显鸡肋，小量代码的parser速度是非常快的，这一部分提升可以忽略不计了）。</p>
+<h3 id="25-kernel编译">2.5 Kernel编译</h3>
+<p>回到transform_tree这个方法，其实这里在初始化Kernel的时候就已经调用了，transform方法很简单就是实例化了一个ASTTransformer对象，并调用了其<code>__call__</code>方法</p>
+<p>这里call重载在父类Builder中：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> __call__(self, ctx, node):
+    method <span style="color:#f92672">=</span> getattr(self, <span style="color:#e6db74">&#39;build_&#39;</span> <span style="color:#f92672">+</span> node<span style="color:#f92672">.</span>__class__<span style="color:#f92672">.</span>__name__, None)
+    <span style="color:#66d9ef">try</span>:
+        <span style="color:#66d9ef">if</span> method <span style="color:#f92672">is</span> None:
+            error_msg <span style="color:#f92672">=</span> f<span style="color:#e6db74">&#39;Unsupported node &#34;{node.__class__.__name__}&#34;&#39;</span>
+            <span style="color:#66d9ef">raise</span> TaichiSyntaxError(error_msg)
+        info <span style="color:#f92672">=</span> ctx<span style="color:#f92672">.</span>get_pos_info(node) <span style="color:#66d9ef">if</span> isinstance(
+            node, (ast<span style="color:#f92672">.</span>stmt, ast<span style="color:#f92672">.</span>expr)) <span style="color:#66d9ef">else</span> <span style="color:#e6db74">&#34;&#34;</span>
+        <span style="color:#66d9ef">with</span> impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>src_info_guard(info):
+            <span style="color:#66d9ef">return</span> method(ctx, node)
+    <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+        <span style="color:#66d9ef">if</span> ctx<span style="color:#f92672">.</span>raised <span style="color:#f92672">or</span> <span style="color:#f92672">not</span> isinstance(node, (ast<span style="color:#f92672">.</span>stmt, ast<span style="color:#f92672">.</span>expr)):
+            <span style="color:#66d9ef">raise</span> e<span style="color:#f92672">.</span>with_traceback(None)
+        ctx<span style="color:#f92672">.</span>raised <span style="color:#f92672">=</span> True
+        e <span style="color:#f92672">=</span> handle_exception_from_cpp(e)
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> isinstance(e, TaichiCompilationError):
+            msg <span style="color:#f92672">=</span> ctx<span style="color:#f92672">.</span>get_pos_info(node) <span style="color:#f92672">+</span> traceback<span style="color:#f92672">.</span>format_exc()
+            <span style="color:#66d9ef">raise</span> TaichiCompilationError(msg) <span style="color:#f92672">from</span> None
+        msg <span style="color:#f92672">=</span> ctx<span style="color:#f92672">.</span>get_pos_info(node) <span style="color:#f92672">+</span> str(e)
+        <span style="color:#66d9ef">raise</span> type(e)(msg) <span style="color:#f92672">from</span> None
+</code></pre></div><p>代码量不大，但却很精华，使用了递归的方式去遍历解析tree。</p>
+<p>这里需要稍微解释一下with关键字，with结构是python中非常好玩的结构，大致可以理解成一种包围，这里with的是一个<code>SrcInfoGuard</code>类型，这里会在执行with内部语句前调用所with对象的<code>__enter__</code>方法，退出with结构时调用<code>__exit__</code>方法，我们这里看一下SrcInfoGuard结构：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">SrcInfoGuard</span>:
+    <span style="color:#66d9ef">def</span> __init__(self, info_stack, info):
+        self<span style="color:#f92672">.</span>info_stack <span style="color:#f92672">=</span> info_stack
+        self<span style="color:#f92672">.</span>info <span style="color:#f92672">=</span> info
+
+    <span style="color:#66d9ef">def</span> __enter__(self):
+        self<span style="color:#f92672">.</span>info_stack<span style="color:#f92672">.</span>append(self<span style="color:#f92672">.</span>info)
+
+    <span style="color:#66d9ef">def</span> __exit__(self, exc_type, exc_val, exc_tb):
+        self<span style="color:#f92672">.</span>info_stack<span style="color:#f92672">.</span>pop()
+</code></pre></div><p>所以这里会在执行method方法前先将info加入到info_stack中，往往也是这种需要栈结构的情况下可以使用with语句。这也是Python比较方便的地方。</p>
+<p>我们继续走，这里的method是build_Module，来到build_Module函数：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">build_stmt <span style="color:#f92672">=</span> ASTTransformer()
+
+<span style="color:#a6e22e">@staticmethod</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">build_Module</span>(ctx, node):
+    <span style="color:#66d9ef">with</span> ctx<span style="color:#f92672">.</span>variable_scope_guard():
+        <span style="color:#75715e"># Do NOT use |build_stmts| which inserts &#39;del&#39; statements to the</span>
+        <span style="color:#75715e"># end and deletes parameters passed into the module</span>
+        <span style="color:#66d9ef">for</span> stmt <span style="color:#f92672">in</span> node<span style="color:#f92672">.</span>body:
+            build_stmt(ctx, stmt)
+    <span style="color:#66d9ef">return</span> None
+</code></pre></div><p>这里的node.body获取的是一个FunctionDef list，当然这里只有一个元素就是我们上面的play函数，这个FunctionDef类其实CPython中的C 结构体，我们在之前的CPython源码中有提及过，这里再次贴出他的结构：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">struct</span> {
+    identifier name;
+    arguments_ty args;
+    asdl_seq <span style="color:#f92672">*</span>body;
+    asdl_seq <span style="color:#f92672">*</span>decorator_list;
+    expr_ty returns;
+    string type_comment;
+} FunctionDef;
+</code></pre></div><p>之后再次调用了ASTTransformer的<code>__call__</code>函数，继续经过with语句，顺利的函数info信息加入到info_stack列表中，这次获取的method是 <code>build_FunctionDef</code>， 进入FunctionDef：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#a6e22e">@staticmethod</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">build_FunctionDef</span>(ctx, node):
+    <span style="color:#66d9ef">if</span> ctx<span style="color:#f92672">.</span>visited_funcdef:
+        <span style="color:#66d9ef">raise</span> TaichiSyntaxError(
+            f<span style="color:#e6db74">&#34;Function definition is not allowed in &#39;ti.{&#39;kernel&#39; if ctx.is_kernel else &#39;func&#39;}&#39;.&#34;</span>
+        )
+    ctx<span style="color:#f92672">.</span>visited_funcdef <span style="color:#f92672">=</span> True
+
+    args <span style="color:#f92672">=</span> node<span style="color:#f92672">.</span>args
+    <span style="color:#66d9ef">assert</span> args<span style="color:#f92672">.</span>vararg <span style="color:#f92672">is</span> None
+    <span style="color:#66d9ef">assert</span> args<span style="color:#f92672">.</span>kwonlyargs <span style="color:#f92672">==</span> []
+    <span style="color:#66d9ef">assert</span> args<span style="color:#f92672">.</span>kw_defaults <span style="color:#f92672">==</span> []
+    <span style="color:#66d9ef">assert</span> args<span style="color:#f92672">.</span>kwarg <span style="color:#f92672">is</span> None
+</code></pre></div><p>开头是一段检验，包括该节点是否访问，参数类型是否合法（这些在之前也进行了检测，taichi的kernel不允许关键字参数，可变参数等）</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">transform_as_kernel</span>():
+    <span style="color:#75715e"># Treat return type</span>
+    <span style="color:#66d9ef">if</span> node<span style="color:#f92672">.</span>returns <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> None:
+        kernel_arguments<span style="color:#f92672">.</span>decl_ret(ctx<span style="color:#f92672">.</span>func<span style="color:#f92672">.</span>return_type,
+                                  ctx<span style="color:#f92672">.</span>is_real_function)
+    impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>prog<span style="color:#f92672">.</span>finalize_rets()
+    <span style="color:#66d9ef">for</span> i, arg <span style="color:#f92672">in</span> enumerate(args<span style="color:#f92672">.</span>args):
+        <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> isinstance(ctx<span style="color:#f92672">.</span>func<span style="color:#f92672">.</span>arguments[i]<span style="color:#f92672">.</span>annotation,
+                          primitive_types<span style="color:#f92672">.</span>RefType):
+            ctx<span style="color:#f92672">.</span>kernel_args<span style="color:#f92672">.</span>append(arg<span style="color:#f92672">.</span>arg)
+        <span style="color:#66d9ef">if</span> isinstance(ctx<span style="color:#f92672">.</span>func<span style="color:#f92672">.</span>arguments[i]<span style="color:#f92672">.</span>annotation,
+                      annotations<span style="color:#f92672">.</span>template):
+            ctx<span style="color:#f92672">.</span>create_variable(arg<span style="color:#f92672">.</span>arg, ctx<span style="color:#f92672">.</span>global_vars[arg<span style="color:#f92672">.</span>arg])
+		<span style="color:#f92672">......</span>
+        <span style="color:#66d9ef">else</span>:
+            ctx<span style="color:#f92672">.</span>create_variable(
+                arg<span style="color:#f92672">.</span>arg,
+                kernel_arguments<span style="color:#f92672">.</span>decl_scalar_arg(
+                    ctx<span style="color:#f92672">.</span>func<span style="color:#f92672">.</span>arguments[i]<span style="color:#f92672">.</span>annotation))
+    <span style="color:#75715e"># remove original args</span>
+    node<span style="color:#f92672">.</span>args<span style="color:#f92672">.</span>args <span style="color:#f92672">=</span> []
+</code></pre></div><p>之后是一个闭包函数<code>transform_as_kernel</code>，这里首先处理返回值，我们的例子中没有返回值，暂时不考虑。之后是处理了函数行参，这里会对taichid几个特殊类型做判断，当然我们的例子中并不包含这些特殊类型，将参数的名称加入到ctx的kernel_args列表中，最后创建variable context:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">decl_scalar_arg</span>(dtype):
+    is_ref <span style="color:#f92672">=</span> False
+    <span style="color:#66d9ef">if</span> isinstance(dtype, RefType):
+        is_ref <span style="color:#f92672">=</span> True
+        dtype <span style="color:#f92672">=</span> dtype<span style="color:#f92672">.</span>tp
+    dtype <span style="color:#f92672">=</span> cook_dtype(dtype)
+    arg_id <span style="color:#f92672">=</span> impl<span style="color:#f92672">.</span>get_runtime()<span style="color:#f92672">.</span>prog<span style="color:#f92672">.</span>decl_scalar_arg(dtype)
+    <span style="color:#66d9ef">return</span> Expr(_ti_core<span style="color:#f92672">.</span>make_arg_load_expr(arg_id, dtype, is_ref))
+</code></pre></div><p>上面的是<code>decl_scalar_arg</code>具体是创建了一个Taichi Cpp Expr对象。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">with</span> ctx<span style="color:#f92672">.</span>variable_scope_guard():
+    build_stmts(ctx, node<span style="color:#f92672">.</span>body)
+</code></pre></div><p>最后就是除了函数体，具体就不看了，和处理函数定义类似的方式，就是前端遍历中AST树的创建罢了。</p>
+<h3 id="26-kernel调用">2.6 Kernel调用</h3>
+<p>回到我们之前存储的闭包，这一次我们可以好好的分析一下这段代码：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">func__</span>(<span style="color:#f92672">*</span>args):
+    <span style="color:#66d9ef">assert</span> len(args) <span style="color:#f92672">==</span> len(
+        self<span style="color:#f92672">.</span>arguments
+    ), f<span style="color:#e6db74">&#39;{len(self.arguments)} arguments needed but {len(args)} provided&#39;</span>
+
+    tmps <span style="color:#f92672">=</span> []
+    callbacks <span style="color:#f92672">=</span> []
+
+    actual_argument_slot <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+    launch_ctx <span style="color:#f92672">=</span> t_kernel<span style="color:#f92672">.</span>make_launch_context()
+    <span style="color:#66d9ef">for</span> i, v <span style="color:#f92672">in</span> enumerate(args):
+        needed <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>arguments[i]<span style="color:#f92672">.</span>annotation
+        <span style="color:#66d9ef">if</span> isinstance(needed, template):
+            <span style="color:#66d9ef">continue</span>
+            provided <span style="color:#f92672">=</span> type(v)
+            <span style="color:#75715e"># Note: do not use sth like &#34;needed == f32&#34;. That would be slow.</span>
+            <span style="color:#66d9ef">if</span> id(needed) <span style="color:#f92672">in</span> primitive_types<span style="color:#f92672">.</span>real_type_ids:
+                <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> isinstance(v, (float, int)):
+                    <span style="color:#66d9ef">raise</span> TaichiRuntimeTypeError<span style="color:#f92672">.</span>get(
+                        i, needed<span style="color:#f92672">.</span>to_string(), provided)
+                    launch_ctx<span style="color:#f92672">.</span>set_arg_float(actual_argument_slot, float(v))
+                 <span style="color:#66d9ef">elif</span> id(needed) <span style="color:#f92672">in</span> primitive_types<span style="color:#f92672">.</span>integer_type_ids:
+                     <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> isinstance(v, int):
+                         <span style="color:#66d9ef">raise</span> TaichiRuntimeTypeError<span style="color:#f92672">.</span>get(
+                             i, needed<span style="color:#f92672">.</span>to_string(), provided)
+                     <span style="color:#66d9ef">if</span> is_signed(cook_dtype(needed)):
+                                launch_ctx<span style="color:#f92672">.</span>set_arg_int(actual_argument_slot, int(v))
+        actual_argument_slot <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>
+     	<span style="color:#f92672">......</span>
+     <span style="color:#66d9ef">try</span>:
+        t_kernel(launch_ctx)
+     <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">Exception</span> <span style="color:#66d9ef">as</span> e:
+        e <span style="color:#f92672">=</span> handle_exception_from_cpp(e)
+        <span style="color:#66d9ef">raise</span> e <span style="color:#f92672">from</span> None
+</code></pre></div><p>这一段代码非常长，我们截取来看，首先检测了形参和实参是否一致（话说，之前ensure的时候不是检测过一次吗？）初始化了两个局部变量<code>tmps、callbacks</code>之后创造了一个LauchContextBuilder对象，这一步依靠pybind绑定的c++实现。之后就是对实参的处理，处理好的参数全部加载到LaouchContext中，最后调用之前创建好的t_kernel，至此python前置部分运行完毕</p></article>
+    </section>
+
+    <footer class="ui attached segment dream-tags" data-html2canvas-ignore>
+      
+        
+          <a class="ui label" href="/tags/taichi" title="taichi">taichi</a>
+        
+          <a class="ui label" href="/tags/compiler" title="compiler">compiler</a>
+        
+          <a class="ui label" href="/tags/python" title="python">python</a>
+        
+      
+      <div
+        class="ui label"
+        style="float: right; cursor: pointer;"
+        onclick="savePostAsImg()">
+        <i class="save icon"></i>Save as image
+      </div>
+    </footer>
+
+    
+
+    
+    
+    
+
+    
+
+  </div>
+  <aside class="sixteen wide mobile sixteen wide tablet four wide computer column dream-single-aside">
+    
+    
+      <div class="ui segment toc">
+        <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-taichi项目结构及源码编译">1. Taichi项目结构及源码编译</a></li>
+    <li><a href="#2-python部分生命周期">2. Python部分生命周期</a>
+      <ul>
+        <li><a href="#21-实例代码">2.1 实例代码</a></li>
+        <li><a href="#22-tachi-init">2.2 Tachi Init</a></li>
+        <li><a href="#23-kernel装饰器">2.3 kernel装饰器</a></li>
+        <li><a href="#24-kernel的运行入口">2.4 kernel的运行入口</a></li>
+        <li><a href="#25-kernel编译">2.5 Kernel编译</a></li>
+        <li><a href="#26-kernel调用">2.6 Kernel调用</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+      </div>
+    
+
+    <article class="dream-header">
+  <section class="ui top attached center aligned segment">
+    <div class="ui small circular image">
+      
+        <img src="/img/avatar.jpg">
+      
+    </div>
+
+    
+    <h1 class="ui medium header">
+    
+      kingkiller&#39;s blog
+      <div class="sub header" style="margin-top: 0.5rem;"></div>
+    
+    </h1>
+    
+
+    <div class="ui horizontal list">
+      
+      <a class="item" href="/tags">
+        <i class="tags icon" title="All Tags"></i>
+      </a>
+      <a class="item" href="/categories">
+        <i class="th list icon" title="All Categories"></i>
+      </a>
+    </div>
+  </section>
+
+  
+  <section class="ui attached center aligned segment dream-tags">
+    
+      
+      
+      <a class="ui label" href="/tags/ai/" title="Ai">
+        Ai
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/algorithm/" title="Algorithm">
+        Algorithm
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/compiler/" title="Compiler">
+        Compiler
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/java/" title="Java">
+        Java
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/python/" title="Python">
+        Python
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/quantum/" title="Quantum">
+        Quantum
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/review/" title="Review">
+        Review
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/spring/" title="Spring">
+        Spring
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/sql/" title="Sql">
+        Sql
+      </a>
+    
+      
+      
+      <a class="ui label" href="/tags/taichi/" title="Taichi">
+        Taichi
+      </a>
+    
+  </section>
+  
+
+  
+  <section class="ui attached segment dream-categories">
+    <div class="ui accordion">
+      
+      
+      
+      
+      
+
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/code/" title="Code">
+              Code
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/taichi-python/">Taichi源码分析（一）</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/d-j/">量子算法之Deutsch-Jozsa算法</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mvc/">spring mvc基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mybatis/">Mybatis基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/mysql/">Mysql基础</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/liner/">机器学习(-):一元线性回归</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/string/">String字符串拼接比较</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/servlet/">Servlet总结</a>
+                </div>
+              </div>
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstblog/">spring</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+        
+
+        
+          <div class="title">
+            <i class="dropdown icon"></i>
+            
+            
+            <a class="item" href="/categories/film/" title="Film">
+              Film
+            </a>
+          </div>
+          <div class="content">
+            <div class="ui list">
+            
+              <div class="item">
+                <div class="content">
+                  <a class="item" href="/post/firstflimreview/">2021春节档前瞻</a>
+                </div>
+              </div>
+            
+            </div>
+          </div>
+        
+      
+
+      
+    </div>
+  </section>
+  
+
+  <section class="ui attached segment header-socials">
+    <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class=" mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class=" linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class=" github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+  </section>
+
+  <section class="ui bottom attached center aligned segment">
+    
+      <p>© 2023 kingkiller’s blog</p>
+    
+
+    <p>Powered by <a href="https://gohugo.io/" target="_blank">Hugo</a> with theme <a href="https://github.com/g1eny0ung/hugo-theme-dream" target="_blank">Dream</a>.</p>
+
+    
+  </section>
+</article>
+
+  </aside>
+</div>
+
+          </div>
+        </section>
+        <section class="back">
+          <div class="dream-max-width">
+            <div class="ui centered relaxed grid dream-grid dream-back">
+  
+  
+  
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    <article>
+      <div class="ui top attached segment">
+        <h3 class="ui header">Social Links</h3>
+      </div>
+      <div class="ui bottom attached segment">
+        <nav class="ui secondary menu dream-menu dream-socials">
+  
+  
+    <div class="item">
+      <a href="mailto:kingaobo@gmail.com">
+        <i class="large mail icon" title="Email"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="item">
+      <a href="https://www.linkedin.com/in/%e5%a5%a5%e5%8d%9a-%e7%8e%8b-77b7271a2" target="_blank">
+        <i class="large linkedin icon" title="Linkedin"></i>
+      </a>
+    </div>
+  
+
+  
+    <div class="item">
+      <a href="https://github.com/LAJIidea" target="_blank">
+        <i class="large github icon" title="GitHub"></i>
+      </a>
+    </div>
+  
+
+  
+
+  
+</nav>
+
+      </div>
+    </article>
+  </section>
+
+  <section class="sixteen wide mobile eight wide tablet four wide computer column dream-column">
+    
+  </section>
+
+  
+    
+  
+</div>
+
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+    window.defaultDark =  null 
+    window.backgroundDark =  null 
+    window.backgroundImageDark =  null 
+    window.darkNav =  true 
+    window.hasTwitterEmbed =  null 
+  
+    if (window.hasTwitterEmbed) {
+      
+      window.twttr = (function (d, s, id) {
+        var js,
+          fjs = d.getElementsByTagName(s)[0],
+          t = window.twttr || {}
+        if (d.getElementById(id)) return t
+        js = d.createElement(s)
+        js.id = id
+        js.src = 'https://platform.twitter.com/widgets.js'
+        fjs.parentNode.insertBefore(js, fjs)
+  
+        t._e = []
+        t.ready = function (f) {
+          t._e.push(f)
+        }
+  
+        return t
+      })(document, 'script', 'twitter-wjs')
+    }
+</script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/semantic.min.js"></script>
+<script src="/js/jquery.overlayScrollbars.min.js"></script>
+<script src="/js/header.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/theme.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js" integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false},
+                {left: "\\(", right: "\\)", display: false},
+                {left: "\\[", right: "\\]", display: true}
+            ]
+        });
+    });
+</script>
+<body>
+    
+</body>
+    
+<script src="/js/html2canvas.min.js"></script>
+<script src="/js/post.js"></script>
+
+
+
+
+
+    
+      <div class="ui inverted segment" id="dream-search">
+  <div class="ui search">
+    <div class="ui transparent input">
+      <input class="prompt" type="text" placeholder="Search" />
+    </div>
+    <div class="results"></div>
+  </div>
+</div>
+<script>
+  $(document).ready(function () {
+    $.getJSON('http:www.kingkiller.cn\//index.json', function (data) {
+      $('.ui.search').search({
+        source: data,
+        searchFields: ['title'],
+        showNoResults: true,
+      })
+    })
+  })
+</script>
+<script src="/js/search.js"></script>
+
+    
+
+    
+
+    
+  </body>
+</html>

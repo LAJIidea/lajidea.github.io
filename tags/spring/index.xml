@@ -2,26 +2,26 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>spring on kingkiller’s blog</title>
-    <link>http://www.kingkiller.cn/tags/spring/</link>
+    <link>http:www.kingkiller.cn/tags/spring/</link>
     <description>Recent content in spring on kingkiller’s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 29 Jan 2021 19:10:13 +0800</lastBuildDate><atom:link href="http://www.kingkiller.cn/tags/spring/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 29 Jan 2021 19:10:13 +0800</lastBuildDate><atom:link href="http:www.kingkiller.cn/tags/spring/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>spring mvc基础</title>
-      <link>http://www.kingkiller.cn/post/mvc/</link>
+      <link>http:www.kingkiller.cn/post/mvc/</link>
       <pubDate>Fri, 29 Jan 2021 19:10:13 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/mvc/</guid>
+      <guid>http:www.kingkiller.cn/post/mvc/</guid>
       <description>&lt;p&gt;了解MVC设计模式的思想,学习spring mvc基础，ssm框架现在虽说没有springboot轻便，但是了解底层基础和演变过程会对boot的学习有很多益处&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>spring</title>
-      <link>http://www.kingkiller.cn/post/firstblog/</link>
+      <link>http:www.kingkiller.cn/post/firstblog/</link>
       <pubDate>Thu, 28 Jan 2021 16:07:02 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/firstblog/</guid>
+      <guid>http:www.kingkiller.cn/post/firstblog/</guid>
       <description>&lt;p&gt;spring framework的学习与介绍，详细讲解了ioc和aop的概念，基于spring5x，了解了面向bean开发的过程。&lt;/p&gt;</description>
     </item>
     

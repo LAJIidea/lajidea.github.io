@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>AI on kingkiller’s blog</title>
-    <link>http://www.kingkiller.cn/tags/ai/</link>
+    <link>http:www.kingkiller.cn/tags/ai/</link>
     <description>Recent content in AI on kingkiller’s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 29 Jan 2021 18:43:31 +0800</lastBuildDate><atom:link href="http://www.kingkiller.cn/tags/ai/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 29 Jan 2021 18:43:31 +0800</lastBuildDate><atom:link href="http:www.kingkiller.cn/tags/ai/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>机器学习(-):一元线性回归</title>
-      <link>http://www.kingkiller.cn/post/liner/</link>
+      <link>http:www.kingkiller.cn/post/liner/</link>
       <pubDate>Fri, 29 Jan 2021 18:43:31 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/liner/</guid>
+      <guid>http:www.kingkiller.cn/post/liner/</guid>
       <description>&lt;p&gt;机器学习中一元线性回归的概念和简单实现&lt;/p&gt;</description>
     </item>
     

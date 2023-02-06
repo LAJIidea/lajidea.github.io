@@ -2,26 +2,26 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>sql on kingkiller’s blog</title>
-    <link>http://www.kingkiller.cn/tags/sql/</link>
+    <link>http:www.kingkiller.cn/tags/sql/</link>
     <description>Recent content in sql on kingkiller’s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 29 Jan 2021 18:44:16 +0800</lastBuildDate><atom:link href="http://www.kingkiller.cn/tags/sql/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 29 Jan 2021 18:44:16 +0800</lastBuildDate><atom:link href="http:www.kingkiller.cn/tags/sql/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Mybatis基础</title>
-      <link>http://www.kingkiller.cn/post/mybatis/</link>
+      <link>http:www.kingkiller.cn/post/mybatis/</link>
       <pubDate>Fri, 29 Jan 2021 18:44:16 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/mybatis/</guid>
+      <guid>http:www.kingkiller.cn/post/mybatis/</guid>
       <description>&lt;p&gt;mybatis的简介和基础学习&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Mysql基础</title>
-      <link>http://www.kingkiller.cn/post/mysql/</link>
+      <link>http:www.kingkiller.cn/post/mysql/</link>
       <pubDate>Fri, 29 Jan 2021 18:43:40 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/mysql/</guid>
+      <guid>http:www.kingkiller.cn/post/mysql/</guid>
       <description>&lt;p&gt;mysql的基础和进阶命令，建议学习的时候跟着敲一遍哦&lt;/p&gt;</description>
     </item>
     

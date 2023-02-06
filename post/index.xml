@@ -2,80 +2,98 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on kingkiller’s blog</title>
-    <link>http://www.kingkiller.cn/post/</link>
+    <link>http:www.kingkiller.cn/post/</link>
     <description>Recent content in Posts on kingkiller’s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 29 Jan 2021 19:10:13 +0800</lastBuildDate><atom:link href="http://www.kingkiller.cn/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 06 Feb 2023 23:07:23 +0800</lastBuildDate><atom:link href="http:www.kingkiller.cn/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Taichi源码分析（一）</title>
+      <link>http:www.kingkiller.cn/post/taichi-python/</link>
+      <pubDate>Mon, 06 Feb 2023 23:07:23 +0800</pubDate>
+      
+      <guid>http:www.kingkiller.cn/post/taichi-python/</guid>
+      <description>&lt;p&gt;Taichi编译链路之Python部分的生命周期&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>量子算法之Deutsch-Jozsa算法</title>
+      <link>http:www.kingkiller.cn/post/d-j/</link>
+      <pubDate>Wed, 01 Sep 2021 21:48:01 +0800</pubDate>
+      
+      <guid>http:www.kingkiller.cn/post/d-j/</guid>
+      <description>&lt;p&gt;D-J算法的学习与介绍，量子算法中快速分辨平衡函数和常数函数的算法。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>spring mvc基础</title>
-      <link>http://www.kingkiller.cn/post/mvc/</link>
+      <link>http:www.kingkiller.cn/post/mvc/</link>
       <pubDate>Fri, 29 Jan 2021 19:10:13 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/mvc/</guid>
+      <guid>http:www.kingkiller.cn/post/mvc/</guid>
       <description>&lt;p&gt;了解MVC设计模式的思想,学习spring mvc基础，ssm框架现在虽说没有springboot轻便，但是了解底层基础和演变过程会对boot的学习有很多益处&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Mybatis基础</title>
-      <link>http://www.kingkiller.cn/post/mybatis/</link>
+      <link>http:www.kingkiller.cn/post/mybatis/</link>
       <pubDate>Fri, 29 Jan 2021 18:44:16 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/mybatis/</guid>
+      <guid>http:www.kingkiller.cn/post/mybatis/</guid>
       <description>&lt;p&gt;mybatis的简介和基础学习&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Mysql基础</title>
-      <link>http://www.kingkiller.cn/post/mysql/</link>
+      <link>http:www.kingkiller.cn/post/mysql/</link>
       <pubDate>Fri, 29 Jan 2021 18:43:40 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/mysql/</guid>
+      <guid>http:www.kingkiller.cn/post/mysql/</guid>
       <description>&lt;p&gt;mysql的基础和进阶命令，建议学习的时候跟着敲一遍哦&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>机器学习(-):一元线性回归</title>
-      <link>http://www.kingkiller.cn/post/liner/</link>
+      <link>http:www.kingkiller.cn/post/liner/</link>
       <pubDate>Fri, 29 Jan 2021 18:43:31 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/liner/</guid>
+      <guid>http:www.kingkiller.cn/post/liner/</guid>
       <description>&lt;p&gt;机器学习中一元线性回归的概念和简单实现&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>String字符串拼接比较</title>
-      <link>http://www.kingkiller.cn/post/string/</link>
+      <link>http:www.kingkiller.cn/post/string/</link>
       <pubDate>Thu, 28 Jan 2021 18:00:58 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/string/</guid>
+      <guid>http:www.kingkiller.cn/post/string/</guid>
       <description>&lt;p&gt;比较 + , StringBuilder, StringBuffer三者在字符串拼接时的速度，从底层了解速度快慢的原理&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>2021春节档前瞻</title>
-      <link>http://www.kingkiller.cn/post/firstflimreview/</link>
+      <link>http:www.kingkiller.cn/post/firstflimreview/</link>
       <pubDate>Thu, 28 Jan 2021 17:09:18 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/firstflimreview/</guid>
-      <description>2021年的春节档前瞻，经历了惨淡的2020年，内地电影市场准备在2021年开春就做出冲击</description>
+      <guid>http:www.kingkiller.cn/post/firstflimreview/</guid>
+      <description>&lt;p&gt;2021年的春节档前瞻，经历了惨淡的2020年，内地电影市场准备在2021年开春就打好新年的第一仗，作为重振内地票房的关键，一起来看看2021年的寒假档都要那些影片吧。主要不是介绍影片，而是分析内地春节档形势。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Servlet总结</title>
-      <link>http://www.kingkiller.cn/post/servlet/</link>
+      <link>http:www.kingkiller.cn/post/servlet/</link>
       <pubDate>Thu, 28 Jan 2021 17:09:18 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/servlet/</guid>
+      <guid>http:www.kingkiller.cn/post/servlet/</guid>
       <description>&lt;p&gt;javaee 中servlet的简单教学，虽说j2ee已经是遥远时代，但是java web开发依然无法离开servlet，从底层学起，详细了解web实际的运行过程，会对将来学习框架更有帮助&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>spring</title>
-      <link>http://www.kingkiller.cn/post/firstblog/</link>
+      <link>http:www.kingkiller.cn/post/firstblog/</link>
       <pubDate>Thu, 28 Jan 2021 16:07:02 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/firstblog/</guid>
+      <guid>http:www.kingkiller.cn/post/firstblog/</guid>
       <description>&lt;p&gt;spring framework的学习与介绍，详细讲解了ioc和aop的概念，基于spring5x，了解了面向bean开发的过程。&lt;/p&gt;</description>
     </item>
     

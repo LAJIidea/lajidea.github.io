@@ -2,53 +2,53 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>java on kingkiller’s blog</title>
-    <link>http://www.kingkiller.cn/tags/java/</link>
+    <link>http:www.kingkiller.cn/tags/java/</link>
     <description>Recent content in java on kingkiller’s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 29 Jan 2021 19:10:13 +0800</lastBuildDate><atom:link href="http://www.kingkiller.cn/tags/java/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 29 Jan 2021 19:10:13 +0800</lastBuildDate><atom:link href="http:www.kingkiller.cn/tags/java/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>spring mvc基础</title>
-      <link>http://www.kingkiller.cn/post/mvc/</link>
+      <link>http:www.kingkiller.cn/post/mvc/</link>
       <pubDate>Fri, 29 Jan 2021 19:10:13 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/mvc/</guid>
+      <guid>http:www.kingkiller.cn/post/mvc/</guid>
       <description>&lt;p&gt;了解MVC设计模式的思想,学习spring mvc基础，ssm框架现在虽说没有springboot轻便，但是了解底层基础和演变过程会对boot的学习有很多益处&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Mybatis基础</title>
-      <link>http://www.kingkiller.cn/post/mybatis/</link>
+      <link>http:www.kingkiller.cn/post/mybatis/</link>
       <pubDate>Fri, 29 Jan 2021 18:44:16 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/mybatis/</guid>
+      <guid>http:www.kingkiller.cn/post/mybatis/</guid>
       <description>&lt;p&gt;mybatis的简介和基础学习&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>String字符串拼接比较</title>
-      <link>http://www.kingkiller.cn/post/string/</link>
+      <link>http:www.kingkiller.cn/post/string/</link>
       <pubDate>Thu, 28 Jan 2021 18:00:58 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/string/</guid>
+      <guid>http:www.kingkiller.cn/post/string/</guid>
       <description>&lt;p&gt;比较 + , StringBuilder, StringBuffer三者在字符串拼接时的速度，从底层了解速度快慢的原理&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Servlet总结</title>
-      <link>http://www.kingkiller.cn/post/servlet/</link>
+      <link>http:www.kingkiller.cn/post/servlet/</link>
       <pubDate>Thu, 28 Jan 2021 17:09:18 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/servlet/</guid>
+      <guid>http:www.kingkiller.cn/post/servlet/</guid>
       <description>&lt;p&gt;javaee 中servlet的简单教学，虽说j2ee已经是遥远时代，但是java web开发依然无法离开servlet，从底层学起，详细了解web实际的运行过程，会对将来学习框架更有帮助&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>spring</title>
-      <link>http://www.kingkiller.cn/post/firstblog/</link>
+      <link>http:www.kingkiller.cn/post/firstblog/</link>
       <pubDate>Thu, 28 Jan 2021 16:07:02 +0800</pubDate>
       
-      <guid>http://www.kingkiller.cn/post/firstblog/</guid>
+      <guid>http:www.kingkiller.cn/post/firstblog/</guid>
       <description>&lt;p&gt;spring framework的学习与介绍，详细讲解了ioc和aop的概念，基于spring5x，了解了面向bean开发的过程。&lt;/p&gt;</description>
     </item>
     
